@@ -71,5 +71,16 @@ bool MapGenerator::isObstacleValid(const Map& map, const Obstacle& obstacle) con
         return false;
     }
 
+    /* Check obstacle not touching an other obstacle */
+    for (const auto& other : map.getObstacles()) {
+        const float dx = obstacle.center.x - other.center.x;
+        const float dy = obstacle.center.y - other.center.y;
+        const float minDist = obstacle.radius + other.radius + 10.0f;
+
+        if ((dx * dx + dy * dy) < (minDist * minDist)) {
+            return false;
+        }
+    }
+
     return true;
 }
