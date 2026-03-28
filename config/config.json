@@ -1,0 +1,14 @@
+{
+  "window": {
+    "width": 1200,
+    "height": 800
+  },
+  "map": {
+    "width": 1200.0,
+    "height": 800.0,
+    "obstacleCount": 20,
+    "obstacleMinSize": 20.0,
+    "obstacleMaxSize": 55.0,
+    "randomSeed": 7
+  }
+}
