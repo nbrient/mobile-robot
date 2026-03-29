@@ -103,12 +103,12 @@ Config Config::loadFromFile(const std::string& filePath) {
     if (jsonData.contains("robot")) {
         const auto& robot = jsonData.at("robot");
 
-        if (robot.contains("robotSize")) {
-            config.robotSize = robot.at("robotSize").get<float>();
+        if (robot.contains("size")) {
+            config.robotSize = robot.at("size").get<float>();
         }
 
         if (robot.contains("robotLineDirectionSize")) {
-            config.robotLineDirectionSize = robot.at("robotLineDirectionSize").get<unsigned int>();
+            config.robotLineDirectionSize = robot.at("robotLineDirectionSize").get<float>();
         }
     }
 

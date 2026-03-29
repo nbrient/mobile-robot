@@ -13,6 +13,6 @@
   },
   "robot":{
     "size" : 15.0,
-    "robotLineDirectionSize": 15
+    "robotLineDirectionSize": 15.0
   }
 }

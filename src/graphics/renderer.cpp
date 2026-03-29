@@ -21,14 +21,13 @@
 #include "graphics/renderer.hpp"
 
 /* Implementation */
-void Renderer::renderMap(sf::RenderWindow& window, const Map& map, const Robot& robot,
-                         const float robotDirectionLineSize) {
+void Renderer::renderMap(sf::RenderWindow& window, const Map& map, const Robot& robot) {
     /* Create and draw map */
     drawMap(window, map);
     /* Create and draw obstacles */
     drawObstacles(window, map);
     /* Create and draw robot */
-    drawRobot(window, robot, robotDirectionLineSize);
+    drawRobot(window, robot);
 }
 
 void Renderer::drawMap(sf::RenderWindow& window, const Map& map) {
@@ -52,7 +51,7 @@ void Renderer::drawObstacles(sf::RenderWindow& window, const Map& map) {
     }
 }
 
-void Renderer::drawRobot(sf::RenderWindow& window, const Robot& robot, float robotLineDirectionSize) {
+void Renderer::drawRobot(sf::RenderWindow& window, const Robot& robot) {
     /* Circle shape */
     sf::CircleShape shape(robot.getRadius());
     shape.setOrigin(robot.getRadius(), robot.getRadius());
@@ -64,8 +63,7 @@ void Renderer::drawRobot(sf::RenderWindow& window, const Robot& robot, float rob
     /* Show its direction */
     sf::Vertex line[] = {
         sf::Vertex(sf::Vector2f(robot.getPosition().x, robot.getPosition().y)),
-        sf::Vertex(sf::Vector2f(robot.getPosition().x + std::cos(robot.getAngle()) * robotLineDirectionSize,
-                                robot.getPosition().y + std::sin(robot.getAngle()) * robotLineDirectionSize))};
-
+        sf::Vertex(sf::Vector2f(robot.getPosition().x + std::cos(robot.getAngle()) * robot.getDirectionLineSize(),
+                                robot.getPosition().y + std::sin(robot.getAngle()) * robot.getDirectionLineSize()))};
     window.draw(line, 2, sf::Lines);
 }

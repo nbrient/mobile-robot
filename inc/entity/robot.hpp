@@ -20,8 +20,10 @@ class Robot {
 public:
     /**
      * @brief Construct a robot with default values.
+     * @param size Robot size.
+     * @param lineSize Size of direction line.
      */
-    Robot();
+    Robot(float size, float lineSize);
 
     /**
      * @brief Update robot state according to current commands.
@@ -79,6 +81,13 @@ public:
      */
     float getRadius() const;
 
+    /**
+     * @brief Get robot direction line size.
+     *
+     * @return Robot direction line size.
+     */
+    float getDirectionLineSize() const;
+
 private:
     /**
      * @brief Current position.
@@ -94,6 +103,11 @@ private:
      * @brief Current robot size.
      */
     float m_radius;
+
+    /**
+     * @brief Direction line size.
+     */
+    float m_directionLineSize;
 
     /**
      * @brief Forward command state.

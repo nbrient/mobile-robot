@@ -34,9 +34,8 @@ public:
      * @param window Target render window.
      * @param map Map to draw.
      * @param robot Robot to draw.
-     * @param robotDirectionLineSize Line size.
      */
-    void renderMap(sf::RenderWindow& window, const Map& map, const Robot& robot, const float robotDirectionLineSize);
+    void renderMap(sf::RenderWindow& window, const Map& map, const Robot& robot);
 
 private:
     /**
@@ -60,9 +59,8 @@ private:
      *
      * @param window Target render window.
      * @param robot Robot to draw.
-     * @param robotLineDirectionSize Size of the line direction.
      */
-    void drawRobot(sf::RenderWindow& window, const Robot& robot, float robotLineDirectionSize);
+    void drawRobot(sf::RenderWindow& window, const Robot& robot);
 };
 
 #endif

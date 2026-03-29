@@ -30,6 +30,7 @@ Application::Application(const Config& config)
     : m_config(config),
       m_window(sf::VideoMode({config.windowWidth, config.windowHeight}), "Robot Map - First version"),
       m_map(config.mapWidth, config.mapHeight),
+      m_robot(config.robotSize, config.robotLineDirectionSize),
       m_mapGenerator(config.randomSeed) {
     m_window.setFramerateLimit(60);
     m_mapGenerator.generateNewObstacle(m_map, m_config);
@@ -63,7 +64,7 @@ void Application::run() {
 
         /* Update window */
         m_window.clear();
-        m_renderer.renderMap(m_window, m_map, m_robot, m_config.robotLineDirectionSize);
+        m_renderer.renderMap(m_window, m_map, m_robot);
         m_window.display();
     }
 }
