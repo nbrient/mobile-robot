@@ -1,0 +1,119 @@
+#ifndef ENTITY_ROBOT_HPP
+#define ENTITY_ROBOT_HPP
+
+/**
+ * @file robot.hpp
+ *
+ * @brief Robot entity declaration.
+ *
+ * @details This class represents a simple mobile robot controlled manually.
+ *
+ *
+ * @version 1.0
+ */
+
+/* Project includes */
+#include "common/types.hpp"
+
+/* Declarations */
+class Robot {
+public:
+    /**
+     * @brief Construct a robot with default values.
+     */
+    Robot();
+
+    /**
+     * @brief Update robot state according to current commands.
+     *
+     * @param dt Frame time step in seconds.
+     */
+    void update(float dt);
+
+    /**
+     * @brief Set forward command state.
+     *
+     * @param forward True to move forward.
+     */
+    void setForward(bool forward);
+
+    /**
+     * @brief Set backward command state.
+     *
+     * @param backward True to move backward.
+     */
+    void setBackward(bool backward);
+
+    /**
+     * @brief Set left command state.
+     *
+     * @param left True to move backward.
+     */
+    void setTurnLeft(bool left);
+
+    /**
+     * @brief Set right command state.
+     *
+     * @param right True to move right.
+     */
+    void setTurnRight(bool right);
+
+    /**
+     * @brief Get robot position.
+     *
+     * @return Constant reference to robot position.
+     */
+    const Vector2Dim& getPosition() const;
+
+    /**
+     * @brief Get robot orientation angle.
+     *
+     * @return Robot angle in radians.
+     */
+    float getAngle() const;
+
+    /**
+     * @brief Get robot radius.
+     *
+     * @return Robot radius.
+     */
+    float getRadius() const;
+
+private:
+    /**
+     * @brief Current position.
+     */
+    Vector2Dim m_position;
+
+    /**
+     * @brief Current robotangle.
+     */
+    float m_angle;
+
+    /**
+     * @brief Current robot size.
+     */
+    float m_radius;
+
+    /**
+     * @brief Forward command state.
+     */
+    bool m_forward;
+
+    /**
+     * @brief backward command state.
+     */
+    bool m_backward;
+
+    /**
+     * @brief Left tuen command state.
+     */
+    bool m_turnLeft;
+
+    /**
+     * @brief Right turn command state.
+     */
+    bool m_turnRight;
+};
+
+#endif

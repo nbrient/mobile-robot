@@ -23,6 +23,7 @@
 
 /* Project includes */
 #include "app/application.hpp"
+#include "entity/robot.hpp"
 
 /* Implementation */
 Application::Application(const Config& config)
@@ -36,6 +37,7 @@ Application::Application(const Config& config)
 
 void Application::run() {
     sf::Event event;
+    float dt = 1.0f / 60.0f;
 
     /* While window open */
     while (m_window.isOpen()) {
@@ -46,9 +48,22 @@ void Application::run() {
             }
         }
 
+        m_robot.setForward(sf::Keyboard::isKeyPressed(sf::Keyboard::Up) || sf::Keyboard::isKeyPressed(sf::Keyboard::Z));
+
+        m_robot.setBackward(sf::Keyboard::isKeyPressed(sf::Keyboard::Down) ||
+                            sf::Keyboard::isKeyPressed(sf::Keyboard::S));
+
+        m_robot.setTurnLeft(sf::Keyboard::isKeyPressed(sf::Keyboard::Left) ||
+                            sf::Keyboard::isKeyPressed(sf::Keyboard::Q));
+
+        m_robot.setTurnRight(sf::Keyboard::isKeyPressed(sf::Keyboard::Right) ||
+                             sf::Keyboard::isKeyPressed(sf::Keyboard::D));
+
+        m_robot.update(dt);
+
         /* Update window */
         m_window.clear();
-        m_renderer.renderMap(m_window, m_map);
+        m_renderer.renderMap(m_window, m_map, m_robot, m_config.robotLineDirectionSize);
         m_window.display();
     }
 }

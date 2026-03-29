@@ -15,16 +15,20 @@
 
 /* Other includes */
 #include <SFML/Graphics.hpp>
+#include <cmath>
 
 /* Project includes */
 #include "graphics/renderer.hpp"
 
 /* Implementation */
-void Renderer::renderMap(sf::RenderWindow& window, const Map& map) {
+void Renderer::renderMap(sf::RenderWindow& window, const Map& map, const Robot& robot,
+                         const float robotDirectionLineSize) {
     /* Create and draw map */
     drawMap(window, map);
     /* Create and draw obstacles */
     drawObstacles(window, map);
+    /* Create and draw robot */
+    drawRobot(window, robot, robotDirectionLineSize);
 }
 
 void Renderer::drawMap(sf::RenderWindow& window, const Map& map) {
@@ -46,4 +50,22 @@ void Renderer::drawObstacles(sf::RenderWindow& window, const Map& map) {
 
         window.draw(shape);
     }
+}
+
+void Renderer::drawRobot(sf::RenderWindow& window, const Robot& robot, float robotLineDirectionSize) {
+    /* Circle shape */
+    sf::CircleShape shape(robot.getRadius());
+    shape.setOrigin(robot.getRadius(), robot.getRadius());
+    shape.setPosition(robot.getPosition().x, robot.getPosition().y);
+    shape.setFillColor(sf::Color::Blue);
+
+    window.draw(shape);
+
+    /* Show its direction */
+    sf::Vertex line[] = {
+        sf::Vertex(sf::Vector2f(robot.getPosition().x, robot.getPosition().y)),
+        sf::Vertex(sf::Vector2f(robot.getPosition().x + std::cos(robot.getAngle()) * robotLineDirectionSize,
+                                robot.getPosition().y + std::sin(robot.getAngle()) * robotLineDirectionSize))};
+
+    window.draw(line, 2, sf::Lines);
 }

@@ -76,6 +76,11 @@ private:
      * @brief Rendering helper.
      */
     Renderer m_renderer;
+
+    /**
+     * @brief Robot instance.
+     */
+    Robot m_robot;
 };
 
 #endif

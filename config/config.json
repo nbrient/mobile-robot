@@ -10,5 +10,9 @@
     "obstacleMinSize": 20.0,
     "obstacleMaxSize": 55.0,
     "randomSeed": 7
+  },
+  "robot":{
+    "size" : 15.0,
+    "robotLineDirectionSize": 15
   }
 }

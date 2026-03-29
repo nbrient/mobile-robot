@@ -67,6 +67,16 @@ struct Config {
     unsigned int randomSeed{10u};
 
     /**
+     * @brief Robot size.
+     */
+    float robotSize{10.0f};
+
+    /**
+     * @brief Length of the robot direction line.
+     */
+    float robotLineDirectionSize{10.0f};
+
+    /**
      * @brief Load configuration from a JSON file.
      *
      * @details Missing JSON fields keep their default values.

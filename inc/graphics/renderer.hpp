@@ -15,6 +15,7 @@
 #include <SFML/Graphics/RenderWindow.hpp>
 
 /* Project includes */
+#include "entity/robot.hpp"
 #include "map/map.hpp"
 
 /* Declarations */
@@ -32,8 +33,10 @@ public:
      *
      * @param window Target render window.
      * @param map Map to draw.
+     * @param robot Robot to draw.
+     * @param robotDirectionLineSize Line size.
      */
-    void renderMap(sf::RenderWindow& window, const Map& map);
+    void renderMap(sf::RenderWindow& window, const Map& map, const Robot& robot, const float robotDirectionLineSize);
 
 private:
     /**
@@ -51,6 +54,15 @@ private:
      * @param map Map containing obstacles.
      */
     void drawObstacles(sf::RenderWindow& window, const Map& map);
+
+    /**
+     * @brief Draw the robot.
+     *
+     * @param window Target render window.
+     * @param robot Robot to draw.
+     * @param robotLineDirectionSize Size of the line direction.
+     */
+    void drawRobot(sf::RenderWindow& window, const Robot& robot, float robotLineDirectionSize);
 };
 
 #endif
