@@ -13,7 +13,7 @@
  */
 
 /* Project includes */
-#include "common/types.hpp"
+#include "common/common.hpp"
 
 /* Declarations */
 class Robot {
@@ -24,13 +24,6 @@ public:
      * @param lineSize Size of direction line.
      */
     Robot(float size, float lineSize);
-
-    /**
-     * @brief Update robot state according to current commands.
-     *
-     * @param dt Frame time step in seconds.
-     */
-    void update(float dt);
 
     /**
      * @brief Set forward command state.
@@ -87,6 +80,22 @@ public:
      * @return Robot direction line size.
      */
     float getDirectionLineSize() const;
+
+    /**
+     * @brief Compute the next requested position.
+     *
+     * @param dt Time step in seconds.
+     *
+     * @return Candidate robot position.
+     */
+    Vector2Dim computeNextPosition(float dt);
+
+    /**
+     * @brief Apply a validated position.
+     *
+     * @param position New robot position.
+     */
+    void setPosition(const Vector2Dim& position);
 
 private:
     /**

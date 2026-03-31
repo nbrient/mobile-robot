@@ -81,6 +81,15 @@ private:
      * @brief Robot instance.
      */
     Robot m_robot;
+
+    /**
+     * @brief Check if a robot candidate position is valid.
+     *
+     * @param candidatePosition Candidate robot center position.
+     *
+     * @return True if the position is valid, flse otherwise.
+     */
+    bool isRobotPositionValid(const Vector2Dim& candidatePosition) const;
 };
 
 #endif

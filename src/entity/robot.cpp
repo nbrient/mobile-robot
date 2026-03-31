@@ -20,38 +20,41 @@ static constexpr float LINEAR_SPEED = 200.0f;
 static constexpr float ANGULAR_SPEED = 2.5f;
 
 /* Implementation */
-Robot::Robot(float size, float lineSize)
+Robot::Robot(float size, float directionLineSize)
     : m_position{100.0f, 100.0f},
       m_angle(0.0f),
       m_radius(size),
-      m_directionLineSize(lineSize),
+      m_directionLineSize(directionLineSize),
       m_forward(false),
       m_backward(false),
       m_turnLeft(false),
       m_turnRight(false) {
 }
 
-void Robot::update(float dt) {
-    if (m_turnLeft) {
+Vector2Dim Robot::computeNextPosition(float dt) {
+    if (m_turnLeft && !m_turnRight) {
         m_angle -= ANGULAR_SPEED * dt;
-    }
-
-    if (m_turnRight) {
+    } else if (m_turnRight && !m_turnLeft) {
         m_angle += ANGULAR_SPEED * dt;
+    } else {
+        /* Nothing to do */
     }
 
     float direction = 0.0f;
 
-    if (m_forward) {
+    if (m_forward && !m_backward) {
         direction += 1.0f;
-    }
-
-    if (m_backward) {
+    } else if (m_backward && !m_forward) {
         direction -= 1.0f;
+    } else {
+        /* Nothing to do */
     }
 
-    m_position.x += std::cos(m_angle) * direction * LINEAR_SPEED * dt;
-    m_position.y += std::sin(m_angle) * direction * LINEAR_SPEED * dt;
+    Vector2Dim nextPosition = m_position;
+    nextPosition.x += std::cos(m_angle) * direction * LINEAR_SPEED * dt;
+    nextPosition.y += std::sin(m_angle) * direction * LINEAR_SPEED * dt;
+
+    return nextPosition;
 }
 
 void Robot::setForward(bool forward) {
@@ -84,4 +87,8 @@ float Robot::getRadius() const {
 
 float Robot::getDirectionLineSize() const {
     return m_directionLineSize;
+}
+
+void Robot::setPosition(const Vector2Dim& position) {
+    m_position = position;
 }

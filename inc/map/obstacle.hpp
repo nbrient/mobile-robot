@@ -12,7 +12,7 @@
  */
 
 /* Project includes */
-#include "common/types.hpp"
+#include "common/common.hpp"
 
 /* Declarations */
 
