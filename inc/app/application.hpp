@@ -21,6 +21,7 @@
 
 /* Other includes */
 #include <SFML/Graphics/RenderWindow.hpp>
+#include <random>
 
 /* Project includes */
 #include "app/config.hpp"
@@ -87,6 +88,11 @@ private:
      * @brief Robot instance.
      */
     Target m_target;
+
+    /**
+     * @brief Radom number generator.
+     */
+    std::mt19937 m_rng;
 
     /**
      * @brief Check if a robot candidate position is valid.

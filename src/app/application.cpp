@@ -34,6 +34,7 @@ Application::Application(const Config& config)
       m_map(config.mapWidth, config.mapHeight),
       m_robot(config.robotSize, config.robotLineDirectionSize),
       m_target(config.targetSize),
+      m_rng(config.randomSeed + 123u),
       m_mapGenerator(config.randomSeed) {
     m_window.setFramerateLimit(framerateLimit);
     m_mapGenerator.generateNewObstacle(m_map, m_config);
@@ -117,13 +118,12 @@ bool Application::isRobotPositionValid(const Vector2Dim& candidatePosition) cons
 }
 
 void Application::generateTargetPosition() {
-    /* Create random position */
-    std::mt19937 rng(m_config.randomSeed + 1u);
+    /* Generate random coordinates */
     std::uniform_real_distribution<float> xDist(m_target.getRadius(), m_map.getWidth() - m_target.getRadius());
     std::uniform_real_distribution<float> yDist(m_target.getRadius(), m_map.getHeight() - m_target.getRadius());
 
     for (int attempt = 0; attempt < 500; ++attempt) {
-        const Vector2Dim candidatePosition = {xDist(rng), yDist(rng)};
+        const Vector2Dim candidatePosition = {xDist(m_rng), yDist(m_rng)};
 
         if (isTargetPositionValid(candidatePosition)) {
             m_target.setPosition(candidatePosition);
@@ -131,10 +131,12 @@ void Application::generateTargetPosition() {
         }
     }
 
-    m_target.setPosition({m_map.getWidth() - 50.0f, m_map.getHeight() - 50.0f});
+    /* If no valid position founded */
+    m_target.setPosition({m_map.getWidth() - m_target.getRadius(), m_map.getHeight() - m_target.getRadius()});
 }
 
 bool Application::isTargetPositionValid(const Vector2Dim& candidatePosition) const {
+    /* Check target no too close to the robot */
     const float minDistanceToRobot = m_robot.getRadius() + m_target.getRadius() + 50.0f;
 
     /* Check if target touching robot */
