@@ -24,10 +24,13 @@
  *     "obstacleMinSize": 5.0,
  *     "obstacleMaxSize": 10.0,
  *     "randomSeed": 10
- *   }
+ *   },
  *   "robot": {
  *     "robotSize": 10.0,
  *     "robotLineDirectionSize": 10
+ *   },
+ *   "target": {
+ *     "size": 10.0
  *   }
  * }
  * @endverbatim
@@ -109,6 +112,14 @@ Config Config::loadFromFile(const std::string& filePath) {
 
         if (robot.contains("robotLineDirectionSize")) {
             config.robotLineDirectionSize = robot.at("robotLineDirectionSize").get<float>();
+        }
+    }
+
+    if (jsonData.contains("target")) {
+        const auto& target = jsonData.at("target");
+
+        if (target.contains("size")) {
+            config.targetSize = target.at("size").get<float>();
         }
     }
 

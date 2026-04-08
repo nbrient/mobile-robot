@@ -77,6 +77,11 @@ struct Config {
     float robotLineDirectionSize{10.0f};
 
     /**
+     * @brief Size of the radius of target.
+     */
+    float targetSize{10.0f};
+
+    /**
      * @brief Load configuration from a JSON file.
      *
      * @details Missing JSON fields keep their default values.

@@ -16,6 +16,7 @@
 
 /* Project includes */
 #include "entity/robot.hpp"
+#include "entity/target.hpp"
 #include "map/map.hpp"
 
 /* Declarations */
@@ -34,8 +35,9 @@ public:
      * @param window Target render window.
      * @param map Map to draw.
      * @param robot Robot to draw.
+     * @param target Target to draw.
      */
-    void renderMap(sf::RenderWindow& window, const Map& map, const Robot& robot);
+    void renderMap(sf::RenderWindow& window, const Map& map, const Robot& robot, const Target& target);
 
 private:
     /**
@@ -61,6 +63,14 @@ private:
      * @param robot Robot to draw.
      */
     void drawRobot(sf::RenderWindow& window, const Robot& robot);
+
+    /**
+     * @brief Draw the target.
+     *
+     * @param window Target render window.
+     * @param target Target to draw.
+     */
+    void drawTarget(sf::RenderWindow& window, const Target& target);
 };
 
 #endif

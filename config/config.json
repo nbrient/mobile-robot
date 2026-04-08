@@ -14,5 +14,8 @@
   "robot":{
     "size" : 15.0,
     "robotLineDirectionSize": 15.0
+  },
+  "target":{
+    "size" : 12.0
   }
 }

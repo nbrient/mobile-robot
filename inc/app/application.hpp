@@ -24,6 +24,7 @@
 
 /* Project includes */
 #include "app/config.hpp"
+#include "entity/target.hpp"
 #include "graphics/renderer.hpp"
 #include "map/map.hpp"
 #include "map/mapGenerator.hpp"
@@ -83,6 +84,11 @@ private:
     Robot m_robot;
 
     /**
+     * @brief Robot instance.
+     */
+    Target m_target;
+
+    /**
      * @brief Check if a robot candidate position is valid.
      *
      * @param candidatePosition Candidate robot center position.
@@ -90,6 +96,21 @@ private:
      * @return True if the position is valid, flse otherwise.
      */
     bool isRobotPositionValid(const Vector2Dim& candidatePosition) const;
+
+    /**
+     * @brief Generate the target position.
+     */
+    void generateTargetPosition();
+
+    /**
+     * @brief Check if the target position is valid.
+     */
+    bool isTargetPositionValid(const Vector2Dim& candidatePosition) const;
+
+    /**
+     * @brief Check if the target has been reached.
+     */
+    bool isTargetReached() const;
 };
 
 #endif

@@ -33,9 +33,11 @@ Application::Application(const Config& config)
       m_window(sf::VideoMode({config.windowWidth, config.windowHeight}), "Robot Map - First version"),
       m_map(config.mapWidth, config.mapHeight),
       m_robot(config.robotSize, config.robotLineDirectionSize),
+      m_target(config.targetSize),
       m_mapGenerator(config.randomSeed) {
     m_window.setFramerateLimit(framerateLimit);
     m_mapGenerator.generateNewObstacle(m_map, m_config);
+    generateTargetPosition();
 }
 
 void Application::run() {
@@ -68,9 +70,15 @@ void Application::run() {
             m_robot.setPosition(candidatePosition);
         }
 
+        /* Generate new target if target reached */
+        if (isTargetReached()) {
+            std::printf("Target reached\n");
+            generateTargetPosition();
+        }
+
         /* Update window */
         m_window.clear();
-        m_renderer.renderMap(m_window, m_map, m_robot);
+        m_renderer.renderMap(m_window, m_map, m_robot, m_target);
         m_window.display();
     }
 }
@@ -106,4 +114,48 @@ bool Application::isRobotPositionValid(const Vector2Dim& candidatePosition) cons
     }
 
     return true;
+}
+
+void Application::generateTargetPosition() {
+    /* Create random position */
+    std::mt19937 rng(m_config.randomSeed + 1u);
+    std::uniform_real_distribution<float> xDist(m_target.getRadius(), m_map.getWidth() - m_target.getRadius());
+    std::uniform_real_distribution<float> yDist(m_target.getRadius(), m_map.getHeight() - m_target.getRadius());
+
+    for (int attempt = 0; attempt < 500; ++attempt) {
+        const Vector2Dim candidatePosition = {xDist(rng), yDist(rng)};
+
+        if (isTargetPositionValid(candidatePosition)) {
+            m_target.setPosition(candidatePosition);
+            return;
+        }
+    }
+
+    m_target.setPosition({m_map.getWidth() - 50.0f, m_map.getHeight() - 50.0f});
+}
+
+bool Application::isTargetPositionValid(const Vector2Dim& candidatePosition) const {
+    const float minDistanceToRobot = m_robot.getRadius() + m_target.getRadius() + 50.0f;
+
+    /* Check if target touching robot */
+    if (distanceSquared(candidatePosition, m_robot.getPosition()) < (minDistanceToRobot * minDistanceToRobot)) {
+        return false;
+    }
+
+    /* Check if target touching an obstacle */
+    for (const auto& obstacle : m_map.getObstacles()) {
+        const float collisionDistance = m_target.getRadius() + obstacle.radius;
+
+        if (distanceSquared(candidatePosition, obstacle.center) < (collisionDistance * collisionDistance)) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+bool Application::isTargetReached() const {
+    const float reachDistance = m_robot.getRadius() + m_target.getRadius();
+
+    return distanceSquared(m_robot.getPosition(), m_target.getPosition()) < (reachDistance * reachDistance);
 }

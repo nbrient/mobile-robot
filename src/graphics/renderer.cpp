@@ -21,13 +21,15 @@
 #include "graphics/renderer.hpp"
 
 /* Implementation */
-void Renderer::renderMap(sf::RenderWindow& window, const Map& map, const Robot& robot) {
+void Renderer::renderMap(sf::RenderWindow& window, const Map& map, const Robot& robot, const Target& target) {
     /* Create and draw map */
     drawMap(window, map);
     /* Create and draw obstacles */
     drawObstacles(window, map);
     /* Create and draw robot */
     drawRobot(window, robot);
+    /* Create and draw target */
+    drawTarget(window, target);
 }
 
 void Renderer::drawMap(sf::RenderWindow& window, const Map& map) {
@@ -66,4 +68,14 @@ void Renderer::drawRobot(sf::RenderWindow& window, const Robot& robot) {
         sf::Vertex(sf::Vector2f(robot.getPosition().x + std::cos(robot.getAngle()) * robot.getDirectionLineSize(),
                                 robot.getPosition().y + std::sin(robot.getAngle()) * robot.getDirectionLineSize()))};
     window.draw(line, 2, sf::Lines);
+}
+
+void Renderer::drawTarget(sf::RenderWindow& window, const Target& target) {
+    /* Circle shape */
+    sf::CircleShape shape(target.getRadius());
+    shape.setOrigin(target.getRadius(), target.getRadius());
+    shape.setPosition(target.getPosition().x, target.getPosition().y);
+    shape.setFillColor(sf::Color::Green);
+
+    window.draw(shape);
 }

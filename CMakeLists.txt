@@ -15,6 +15,7 @@ add_executable(robot_manual_target
     src/map/mapGenerator.cpp
     src/graphics/renderer.cpp
     src/entity/robot.cpp
+    src/entity/target.cpp
 )
 
 target_include_directories(robot_manual_target
