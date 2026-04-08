@@ -13,7 +13,9 @@ add_executable(robot_manual_target
     src/app/config.cpp
     src/map/map.cpp
     src/map/mapGenerator.cpp
+    src/entity/target.cpp
     src/graphics/renderer.cpp
+    src/graphics/hud.cpp
     src/entity/robot.cpp
     src/entity/target.cpp
 )

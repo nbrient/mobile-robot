@@ -12,6 +12,8 @@
  *     clear frame buffer
  *     render map
  *     display frame
+ *     collision
+ *     user input actions
  * @endverbatim
  *
  * @version 1.0
@@ -27,6 +29,7 @@
 
 /* Implementation */
 const uint8_t framerateLimit{60u};
+const uint8_t timerTargetReachedDisplay{1u};
 
 Application::Application(const Config& config)
     : m_config(config),
@@ -35,10 +38,16 @@ Application::Application(const Config& config)
       m_robot(config.robotSize, config.robotLineDirectionSize),
       m_target(config.targetSize),
       m_rng(config.randomSeed + 123u),
-      m_mapGenerator(config.randomSeed) {
+      m_mapGenerator(config.randomSeed),
+      m_targetReachedCount(0),
+      m_showTargetReached(false),
+      m_targetReachedTimer(0.0f) {
     m_window.setFramerateLimit(framerateLimit);
     m_mapGenerator.generateNewObstacle(m_map, m_config);
     generateTargetPosition();
+
+    /* Put a valid font path here on your machine */
+    m_hud.initializeHud("../assets/arial.ttf");
 }
 
 void Application::run() {
@@ -52,34 +61,56 @@ void Application::run() {
             if (event.type == sf::Event::Closed) {
                 m_window.close();
             }
+            /* Handle hud actions */
+            handleSingleKeyActions(event);
         }
 
-        m_robot.setForward(sf::Keyboard::isKeyPressed(sf::Keyboard::Up) || sf::Keyboard::isKeyPressed(sf::Keyboard::Z));
+        if (m_mode == Mode::Manual) {
+            m_robot.setForward(sf::Keyboard::isKeyPressed(sf::Keyboard::Up) ||
+                               sf::Keyboard::isKeyPressed(sf::Keyboard::Z));
 
-        m_robot.setBackward(sf::Keyboard::isKeyPressed(sf::Keyboard::Down) ||
-                            sf::Keyboard::isKeyPressed(sf::Keyboard::S));
+            m_robot.setBackward(sf::Keyboard::isKeyPressed(sf::Keyboard::Down) ||
+                                sf::Keyboard::isKeyPressed(sf::Keyboard::S));
 
-        m_robot.setTurnLeft(sf::Keyboard::isKeyPressed(sf::Keyboard::Left) ||
-                            sf::Keyboard::isKeyPressed(sf::Keyboard::Q));
+            m_robot.setTurnLeft(sf::Keyboard::isKeyPressed(sf::Keyboard::Left) ||
+                                sf::Keyboard::isKeyPressed(sf::Keyboard::Q));
 
-        m_robot.setTurnRight(sf::Keyboard::isKeyPressed(sf::Keyboard::Right) ||
-                             sf::Keyboard::isKeyPressed(sf::Keyboard::D));
+            m_robot.setTurnRight(sf::Keyboard::isKeyPressed(sf::Keyboard::Right) ||
+                                 sf::Keyboard::isKeyPressed(sf::Keyboard::D));
 
-        Vector2Dim candidatePosition = m_robot.computeNextPosition(dt);
+            Vector2Dim candidatePosition = m_robot.computeNextPosition(dt);
 
-        if (isRobotPositionValid(candidatePosition)) {
-            m_robot.setPosition(candidatePosition);
+            if (isRobotPositionValid(candidatePosition)) {
+                m_robot.setPosition(candidatePosition);
+            }
+
+            if (isTargetReached()) {
+                m_targetReachedCount++;
+                m_showTargetReached = true;
+                m_targetReachedTimer = timerTargetReachedDisplay;
+                generateTargetPosition();
+            }
+        } else {
+            m_robot.setForward(false);
+            m_robot.setBackward(false);
+            m_robot.setTurnLeft(false);
+            m_robot.setTurnRight(false);
         }
 
-        /* Generate new target if target reached */
-        if (isTargetReached()) {
-            std::printf("Target reached\n");
-            generateTargetPosition();
+        /* Timer reached display */
+        if (m_showTargetReached) {
+            m_targetReachedTimer -= dt;
+
+            if (m_targetReachedTimer <= 0.0f) {
+                m_showTargetReached = false;
+                m_targetReachedTimer = 0.0f;
+            }
         }
 
         /* Update window */
         m_window.clear();
         m_renderer.renderMap(m_window, m_map, m_robot, m_target);
+        m_hud.renderHud(m_window, m_mode, m_targetReachedCount, m_showTargetReached);
         m_window.display();
     }
 }
@@ -160,4 +191,43 @@ bool Application::isTargetReached() const {
     const float reachDistance = m_robot.getRadius() + m_target.getRadius();
 
     return distanceSquared(m_robot.getPosition(), m_target.getPosition()) < (reachDistance * reachDistance);
+}
+
+void Application::regenerateMapAndTarget() {
+    m_mapGenerator.generateNewObstacle(m_map, m_config);
+    generateTargetPosition();
+}
+
+void Application::handleSingleKeyActions(const sf::Event& event) {
+    if (event.type != sf::Event::KeyPressed) {
+        return;
+    }
+    switch (event.key.code) {
+        /* Close window if escape pressed */
+        case sf::Keyboard::Escape:
+            m_window.close();
+            break;
+
+        /* Pause game if p pressed */
+        case sf::Keyboard::P:
+            if (m_mode == Mode::Manual) {
+                m_mode = Mode::Pause;
+            } else {
+                m_mode = Mode::Manual;
+            }
+            break;
+
+        /* Reload map and target if r pressed */
+        case sf::Keyboard::R:
+            regenerateMapAndTarget();
+            break;
+
+        /* Regenerate target position if t pressed */
+        case sf::Keyboard::T:
+            generateTargetPosition();
+            break;
+
+        default:
+            break;
+    }
 }

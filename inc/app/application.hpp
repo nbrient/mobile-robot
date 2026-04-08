@@ -25,7 +25,10 @@
 
 /* Project includes */
 #include "app/config.hpp"
+#include "common/mode.hpp"
+#include "entity/robot.hpp"
 #include "entity/target.hpp"
+#include "graphics/hud.hpp"
 #include "graphics/renderer.hpp"
 #include "map/map.hpp"
 #include "map/mapGenerator.hpp"
@@ -52,6 +55,51 @@ public:
      * @brief Run the application.
      */
     void run();
+
+private:
+    /**
+     * @brief Check if a robot candidate position is valid.
+     *
+     * @param candidatePosition Candidate robot center position.
+     *
+     * @return True if the position is valid, flse otherwise.
+     */
+    bool isRobotPositionValid(const Vector2Dim& candidatePosition) const;
+
+    /**
+     * @brief Generate the target position.
+     */
+    void generateTargetPosition();
+
+    /**
+     * @brief Check if the target position is valid.
+     */
+    bool isTargetPositionValid(const Vector2Dim& candidatePosition) const;
+
+    /**
+     * @brief Check if the target has been reached.
+     */
+    bool isTargetReached() const;
+
+    /**
+     * @brief Reset the map and target.
+     * Triggered by pressing "r"
+     *
+     */
+    void regenerateMapAndTarget();
+
+    /**
+     * @brief Handle single key pressed actions.
+     *
+     * Managed keys:
+     * - Escape: close application
+     * - P: toggle pause/manual mode
+     * - R: regenerate map and target
+     * - T: regenerate target only
+     *
+     * @param event SFML event received from the window.
+     */
+    void handleSingleKeyActions(const sf::Event& event);
 
 private:
     /**
@@ -95,28 +143,29 @@ private:
     std::mt19937 m_rng;
 
     /**
-     * @brief Check if a robot candidate position is valid.
-     *
-     * @param candidatePosition Candidate robot center position.
-     *
-     * @return True if the position is valid, flse otherwise.
+     * @brief Game mode.
      */
-    bool isRobotPositionValid(const Vector2Dim& candidatePosition) const;
+    Mode m_mode;
 
     /**
-     * @brief Generate the target position.
+     * @brief Target reached counter.
      */
-    void generateTargetPosition();
+    int m_targetReachedCount;
 
     /**
-     * @brief Check if the target position is valid.
+     * @brief Display flag.
      */
-    bool isTargetPositionValid(const Vector2Dim& candidatePosition) const;
+    bool m_showTargetReached;
 
     /**
-     * @brief Check if the target has been reached.
+     * @brief Counter to display 'target reached' message.
      */
-    bool isTargetReached() const;
+    float m_targetReachedTimer;
+
+    /**
+     * @brief Hud instance.
+     */
+    Hud m_hud;
 };
 
 #endif
