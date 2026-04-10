@@ -35,15 +35,16 @@ Application::Application(const Config& config)
     : m_config(config),
       m_window(sf::VideoMode({config.windowWidth, config.windowHeight}), "Robot Map - First version"),
       m_map(config.mapWidth, config.mapHeight),
-      m_robot(config.robotSize, config.robotLineDirectionSize),
+      m_robot(config.robotSize, config.robotLineDirectionSize, config.defaultRobotX, config.defaultRobotY),
       m_target(config.targetSize),
       m_rng(config.randomSeed + 123u),
       m_mapGenerator(config.randomSeed),
       m_targetReachedCount(0),
       m_showTargetReached(false),
-      m_targetReachedTimer(0.0f) {
+      m_targetReachedTimer(0.0f),
+      m_mode{Mode::Manual} {
     m_window.setFramerateLimit(framerateLimit);
-    m_mapGenerator.generateNewObstacle(m_map, m_config);
+    m_mapGenerator.generateNewObstacle(m_map, m_config, m_robot.getPosition(), m_robot.getRadius());
     generateTargetPosition();
 
     /* Put a valid font path here on your machine */
@@ -194,7 +195,8 @@ bool Application::isTargetReached() const {
 }
 
 void Application::regenerateMapAndTarget() {
-    m_mapGenerator.generateNewObstacle(m_map, m_config);
+    m_robot.setPosition({m_config.defaultRobotX, m_config.defaultRobotY});
+    m_mapGenerator.generateNewObstacle(m_map, m_config, m_robot.getPosition(), m_robot.getRadius());
     generateTargetPosition();
 }
 

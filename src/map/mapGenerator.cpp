@@ -34,7 +34,8 @@
 MapGenerator::MapGenerator(unsigned int seed) : m_rng(seed) {
 }
 
-void MapGenerator::generateNewObstacle(Map& map, const Config& config) {
+void MapGenerator::generateNewObstacle(Map& map, const Config& config, const Vector2Dim& robotPosition,
+                                       const float robotRadius) {
     map.clearObstacles();
 
     /* Create random floating point */
@@ -55,14 +56,15 @@ void MapGenerator::generateNewObstacle(Map& map, const Config& config) {
         obstacle.radius = radiusDist(m_rng);
 
         /* Check if obstacle is valid */
-        if (isObstacleValid(map, obstacle)) {
+        if (isObstacleValid(map, obstacle, robotPosition, robotRadius)) {
             map.addObstacle(obstacle);
             created++;
         }
     }
 }
 
-bool MapGenerator::isObstacleValid(const Map& map, const Obstacle& obstacle) const {
+bool MapGenerator::isObstacleValid(const Map& map, const Obstacle& obstacle, const Vector2Dim& robotPosition,
+                                   const float robotRadius) const {
     /* Check if obstacle is in the map */
     if (obstacle.center.x - obstacle.radius < 0.0f || obstacle.center.x + obstacle.radius > map.getWidth()) {
         return false;
@@ -73,13 +75,17 @@ bool MapGenerator::isObstacleValid(const Map& map, const Obstacle& obstacle) con
 
     /* Check obstacle not touching an other obstacle */
     for (const auto& other : map.getObstacles()) {
-        const float dx = obstacle.center.x - other.center.x;
-        const float dy = obstacle.center.y - other.center.y;
         const float minDist = obstacle.radius + other.radius + 10.0f;
 
-        if ((dx * dx + dy * dy) < (minDist * minDist)) {
+        if (distanceSquared(obstacle.center, other.center) < (minDist * minDist)) {
             return false;
         }
+    }
+
+    const float minDist = obstacle.radius + robotRadius + 10.0f;
+
+    if (distanceSquared(obstacle.center, robotPosition) < (minDist * minDist)) {
+        return false;
     }
 
     return true;

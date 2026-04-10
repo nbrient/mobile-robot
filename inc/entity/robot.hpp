@@ -22,8 +22,10 @@ public:
      * @brief Construct a robot with default values.
      * @param size Robot size.
      * @param lineSize Size of direction line.
+     * @param defaultX Default robot x position.
+     * @param defaultY Default robot Y position.
      */
-    Robot(float size, float lineSize);
+    Robot(float size, float lineSize, float defaultX, float defaultY);
 
     /**
      * @brief Set forward command state.

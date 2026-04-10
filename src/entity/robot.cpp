@@ -20,8 +20,8 @@ static constexpr float LINEAR_SPEED = 200.0f;
 static constexpr float ANGULAR_SPEED = 2.5f;
 
 /* Implementation */
-Robot::Robot(float size, float directionLineSize)
-    : m_position{100.0f, 100.0f},
+Robot::Robot(float size, float directionLineSize, float defaultX, float defaultY)
+    : m_position{defaultX, defaultY},
       m_angle(0.0f),
       m_radius(size),
       m_directionLineSize(directionLineSize),

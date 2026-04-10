@@ -13,7 +13,9 @@
   },
   "robot":{
     "size" : 15.0,
-    "robotLineDirectionSize": 15.0
+    "robotLineDirectionSize": 15.0,
+    "defaultX" : 100.0,
+    "defaultY" : 100.0
   },
   "target":{
     "size" : 12.0

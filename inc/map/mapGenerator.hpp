@@ -40,8 +40,10 @@ public:
      *
      * @param map Map to populate.
      * @param config Generation parameters.
+     * @param robotPosition Current robot position.
+     * @param robotRadius Current robot radius.
      */
-    void generateNewObstacle(Map& map, const Config& config);
+    void generateNewObstacle(Map& map, const Config& config, const Vector2Dim& robotPosition, const float robotRadius);
 
 private:
     /**
@@ -49,10 +51,12 @@ private:
      *
      * @param map Current map state.
      * @param obstacle Candidate obstacle.
-     *
+     * @param robotPosition Current robot position.
+     * @param robotRadius Current robot radius.
      * @return True if the obstacle is valid, false otherwise.
      */
-    bool isObstacleValid(const Map& map, const Obstacle& obstacle) const;
+    bool isObstacleValid(const Map& map, const Obstacle& obstacle, const Vector2Dim& robotPosition,
+                         const float robotRadius) const;
 
 private:
     /**

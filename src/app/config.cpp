@@ -27,7 +27,9 @@
  *   },
  *   "robot": {
  *     "robotSize": 10.0,
- *     "robotLineDirectionSize": 10
+ *     "robotLineDirectionSize": 15.0,
+ *     "defaultX" : 100.0,
+ *     "defaultY" : 100.0
  *   },
  *   "target": {
  *     "size": 10.0
@@ -112,6 +114,14 @@ Config Config::loadFromFile(const std::string& filePath) {
 
         if (robot.contains("robotLineDirectionSize")) {
             config.robotLineDirectionSize = robot.at("robotLineDirectionSize").get<float>();
+        }
+
+        if (robot.contains("defaultX")) {
+            config.defaultRobotX = robot.at("defaultX").get<float>();
+        }
+
+        if (robot.contains("defaultY")) {
+            config.defaultRobotY = robot.at("defaultY").get<float>();
         }
     }
 

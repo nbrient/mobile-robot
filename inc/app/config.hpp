@@ -77,6 +77,16 @@ struct Config {
     float robotLineDirectionSize{10.0f};
 
     /**
+     * @brief Default X position for robot.
+     */
+    float defaultRobotX{100.0};
+
+    /**
+     * @brief Default Y position for robot.
+     */
+    float defaultRobotY{100.0};
+
+    /**
      * @brief Size of the radius of target.
      */
     float targetSize{10.0f};
