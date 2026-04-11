@@ -28,9 +28,32 @@
 #include "entity/robot.hpp"
 
 /* Implementation */
-const uint8_t framerateLimit{60u};
-const uint8_t timerTargetReachedDisplay{1u};
+namespace {
 
+/**
+ * @brief Frame rate limit.
+ *
+ */
+const uint8_t FRAME_RATE_LIMIT{60u};
+
+/**
+ * @brief Timer to display message when target is reached.
+ *
+ */
+const uint8_t TIMER_TARGET_REACHED_DISPLAY{1u};
+
+/**
+ * @brief Threashold angle to go forward.
+ *
+ */
+const float ANGLETHRESHOLD{0.15f};
+
+/**
+ * @brief Cell size for path planner.
+ *
+ */
+const float cellSize{20.0f};
+}  // namespace
 Application::Application(const Config& config)
     : m_config(config),
       m_window(sf::VideoMode({config.windowWidth, config.windowHeight}), "Robot Map - First version"),
@@ -42,8 +65,10 @@ Application::Application(const Config& config)
       m_targetReachedCount(0),
       m_showTargetReached(false),
       m_targetReachedTimer(0.0f),
-      m_mode{Mode::Manual} {
-    m_window.setFramerateLimit(framerateLimit);
+      m_mode(Mode::Manual),
+      m_pathPlanner(cellSize),
+      m_currentWayPointIndex(0U) {
+    m_window.setFramerateLimit(FRAME_RATE_LIMIT);
     m_mapGenerator.generateNewObstacle(m_map, m_config, m_robot.getPosition(), m_robot.getRadius());
     generateTargetPosition();
 
@@ -53,7 +78,7 @@ Application::Application(const Config& config)
 
 void Application::run() {
     sf::Event event;
-    float dt = 1.0f / static_cast<float>(framerateLimit);
+    float dt = 1.0f / static_cast<float>(FRAME_RATE_LIMIT);
 
     /* While window open */
     while (m_window.isOpen()) {
@@ -79,23 +104,32 @@ void Application::run() {
             m_robot.setTurnRight(sf::Keyboard::isKeyPressed(sf::Keyboard::Right) ||
                                  sf::Keyboard::isKeyPressed(sf::Keyboard::D));
 
-            Vector2Dim candidatePosition = m_robot.computeNextPosition(dt);
-
-            if (isRobotPositionValid(candidatePosition)) {
-                m_robot.setPosition(candidatePosition);
-            }
-
-            if (isTargetReached()) {
-                m_targetReachedCount++;
-                m_showTargetReached = true;
-                m_targetReachedTimer = timerTargetReachedDisplay;
-                generateTargetPosition();
-            }
+        } else if (m_mode == Mode::Auto) {
+            updateAutoMode(dt);
         } else {
             m_robot.setForward(false);
             m_robot.setBackward(false);
             m_robot.setTurnLeft(false);
             m_robot.setTurnRight(false);
+        }
+
+        /* Check candidate position */
+        Vector2Dim candidatePosition = m_robot.computeNextPosition(dt);
+
+        if (isRobotPositionValid(candidatePosition)) {
+            m_robot.setPosition(candidatePosition);
+        } else {
+            if (m_mode == Mode::Auto) {
+                recomputePath();
+            }
+        }
+
+        if (isTargetReached()) {
+            m_targetReachedCount++;
+            m_showTargetReached = true;
+            m_targetReachedTimer = TIMER_TARGET_REACHED_DISPLAY;
+
+            generateTargetPosition();
         }
 
         /* Timer reached display */
@@ -150,8 +184,8 @@ bool Application::isRobotPositionValid(const Vector2Dim& candidatePosition) cons
 }
 
 void Application::generateTargetPosition() {
-    /* Generate random coordinates */
     std::uniform_real_distribution<float> xDist(m_target.getRadius(), m_map.getWidth() - m_target.getRadius());
+
     std::uniform_real_distribution<float> yDist(m_target.getRadius(), m_map.getHeight() - m_target.getRadius());
 
     for (int attempt = 0; attempt < 500; ++attempt) {
@@ -159,12 +193,20 @@ void Application::generateTargetPosition() {
 
         if (isTargetPositionValid(candidatePosition)) {
             m_target.setPosition(candidatePosition);
+
+            if (m_mode == Mode::Auto) {
+                recomputePath();
+            }
             return;
         }
     }
 
-    /* If no valid position founded */
-    m_target.setPosition({m_map.getWidth() - m_target.getRadius(), m_map.getHeight() - m_target.getRadius()});
+    const float margin = m_target.getRadius() + 5.0f;
+    m_target.setPosition({m_map.getWidth() - margin, m_map.getHeight() - margin});
+
+    if (m_mode == Mode::Auto) {
+        recomputePath();
+    }
 }
 
 bool Application::isTargetPositionValid(const Vector2Dim& candidatePosition) const {
@@ -196,8 +238,10 @@ bool Application::isTargetReached() const {
 
 void Application::regenerateMapAndTarget() {
     m_robot.setPosition({m_config.defaultRobotX, m_config.defaultRobotY});
+    m_mode = Mode::Manual;
     m_mapGenerator.generateNewObstacle(m_map, m_config, m_robot.getPosition(), m_robot.getRadius());
     generateTargetPosition();
+    recomputePath();
 }
 
 void Application::handleSingleKeyActions(const sf::Event& event) {
@@ -212,7 +256,7 @@ void Application::handleSingleKeyActions(const sf::Event& event) {
 
         /* Pause game if p pressed */
         case sf::Keyboard::P:
-            if (m_mode == Mode::Manual) {
+            if (m_mode == Mode::Manual || m_mode == Mode::Auto) {
                 m_mode = Mode::Pause;
             } else {
                 m_mode = Mode::Manual;
@@ -229,7 +273,96 @@ void Application::handleSingleKeyActions(const sf::Event& event) {
             generateTargetPosition();
             break;
 
+        /* Regenerate target position if t pressed */
+        case sf::Keyboard::M:
+            if (m_mode == Mode::Manual) {
+                m_mode = Mode::Auto;
+                recomputePath();
+            } else if (m_mode == Mode::Auto) {
+                m_mode = Mode::Manual;
+            } else {
+                /* Nothing to do */
+            }
+            break;
+
         default:
             break;
+    }
+}
+
+void Application::recomputePath() {
+    /* Calculates path to target */
+    m_currentPath =
+        m_pathPlanner.computePath(m_map, m_robot.getRadius(), m_robot.getPosition(), m_target.getPosition());
+
+    /* Reset first point to reach */
+    m_currentWayPointIndex = 0U;
+}
+
+void Application::updateAutoMode(float dt) {
+    /* Unused actually */
+    (void)dt;
+
+    /* If path is empty, stop the robot */
+    if (m_currentPath.empty()) {
+        m_robot.setForward(false);
+        m_robot.setBackward(false);
+        m_robot.setTurnLeft(false);
+        m_robot.setTurnRight(false);
+        return;
+    }
+
+    /* Get current robot position and next way point */
+    const Vector2Dim robotPosition = m_robot.getPosition();
+    const Vector2Dim wayPoint = m_currentPath[m_currentWayPointIndex];
+
+    /* If robot reach way point, pass next way point */
+    const float reachDistance = m_robot.getRadius();
+    if (distanceSquared(robotPosition, wayPoint) < (reachDistance * reachDistance)) {
+        m_currentWayPointIndex++;
+
+        /* End of path */
+        if (m_currentWayPointIndex >= m_currentPath.size()) {
+            m_robot.setForward(false);
+            m_robot.setBackward(false);
+            m_robot.setTurnLeft(false);
+            m_robot.setTurnRight(false);
+            return;
+        }
+    }
+
+    /* Calculate vector from robot to next waypoint */
+    const Vector2Dim nextWayPoint = m_currentPath[m_currentWayPointIndex];
+    const float dx = nextWayPoint.x - robotPosition.x;
+    const float dy = nextWayPoint.y - robotPosition.y;
+
+    /* Calculate angles */
+    const float nextWayPointAngle = std::atan2(dy, dx); /* Use atan2 to disable divisaion by 0 with tan (dx=0) */
+    const float robotAngle = m_robot.getAngle();
+
+    float angleDiff = nextWayPointAngle - robotAngle;
+
+    /* Normalize angle between pi and -pi */
+    while (angleDiff > 3.14159265f) {
+        angleDiff -= 2.0f * 3.14159265f;
+    }
+
+    while (angleDiff < -3.14159265f) {
+        angleDiff += 2.0f * 3.14159265f;
+    }
+
+    /* Turn in right direction or forward if in threshold */
+    if (angleDiff > ANGLETHRESHOLD) {
+        m_robot.setForward(false);
+        m_robot.setTurnLeft(false);
+        m_robot.setTurnRight(true);
+    } else if (angleDiff < -ANGLETHRESHOLD) {
+        m_robot.setForward(false);
+        m_robot.setTurnLeft(true);
+        m_robot.setTurnRight(false);
+    } else {
+        m_robot.setForward(true);
+        m_robot.setTurnLeft(false);
+        m_robot.setTurnRight(false);
     }
 }

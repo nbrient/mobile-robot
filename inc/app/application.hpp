@@ -22,6 +22,7 @@
 /* Other includes */
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <random>
+#include <vector>
 
 /* Project includes */
 #include "app/config.hpp"
@@ -32,6 +33,7 @@
 #include "graphics/renderer.hpp"
 #include "map/map.hpp"
 #include "map/mapGenerator.hpp"
+#include "nav/pathPlanner.hpp"
 
 /* Declarations */
 
@@ -96,10 +98,23 @@ private:
      * - P: toggle pause/manual mode
      * - R: regenerate map and target
      * - T: regenerate target only
+     * - M: pass to manual/auto mode
      *
      * @param event SFML event received from the window.
      */
     void handleSingleKeyActions(const sf::Event& event);
+
+    /**
+     * @brief Recompute the current path from robot to target.
+     */
+    void recomputePath();
+
+    /**
+     * @brief Update robot state in auto mode.
+     *
+     * @param dt Time step in seconds.
+     */
+    void updateAutoMode(float dt);
 
 private:
     /**
@@ -166,6 +181,21 @@ private:
      * @brief Hud instance.
      */
     Hud m_hud;
+
+    /**
+     * @brief Grid-based path planner.
+     */
+    PathPlanner m_pathPlanner;
+
+    /**
+     * @brief Current sequence of waypoints.
+     */
+    std::vector<Vector2Dim> m_currentPath;
+
+    /**
+     * @brief Current waypoint index in the path.
+     */
+    std::size_t m_currentWayPointIndex;
 };
 
 #endif

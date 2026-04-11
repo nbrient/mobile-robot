@@ -16,8 +16,10 @@
 #include "entity/robot.hpp"
 
 /* Definitions */
+namespace {
 static constexpr float LINEAR_SPEED = 200.0f;
 static constexpr float ANGULAR_SPEED = 2.5f;
+}  // namespace
 
 /* Implementation */
 Robot::Robot(float size, float directionLineSize, float defaultX, float defaultY)

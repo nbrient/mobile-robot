@@ -16,6 +16,6 @@
 /**
  * @brief Runtime mode of the application.
  */
-enum class Mode { Manual, Pause };
+enum class Mode { Manual, Pause, Auto };
 
 #endif

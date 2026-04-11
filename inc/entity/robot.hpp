@@ -106,7 +106,7 @@ private:
     Vector2Dim m_position;
 
     /**
-     * @brief Current robotangle.
+     * @brief Current robotangle in radians.
      */
     float m_angle;
 

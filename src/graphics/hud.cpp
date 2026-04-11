@@ -43,7 +43,13 @@ void Hud::renderHud(sf::RenderWindow& window, Mode mode, int targetReachedCount,
     text.setPosition(10.0f, 10.0f);
 
     std::string modeText = "Mode: ";
-    modeText += (mode == Mode::Manual) ? "Manual" : "Pause";
+    if (mode == Mode::Manual) {
+        modeText += "Manual";
+    } else if (mode == Mode::Auto) {
+        modeText += "Auto";
+    } else {
+        modeText += "Pause";
+    }
 
     text.setString(modeText + "\nTargets reached: " + std::to_string(targetReachedCount) +
                    "\nControls:" + "\n  ZQSD / arrows: move" + "\n  R: regenerate map + target" +
