@@ -22,7 +22,7 @@
 
 /* Implementation */
 void Renderer::renderMap(sf::RenderWindow& window, const Map& map, const Robot& robot, const Target& target,
-                         const std::vector<Vector2Dim>& path, std::size_t currentWayPointIndex) {
+                         const std::vector<Vector2Dim>& path, std::size_t currentWayPointIndex, bool displayPath) {
     /* Create and draw map */
     drawMap(window, map);
 
@@ -36,7 +36,9 @@ void Renderer::renderMap(sf::RenderWindow& window, const Map& map, const Robot& 
     drawTarget(window, target);
 
     /* Draw planned path */
-    drawPath(window, path, currentWayPointIndex);
+    if (displayPath) {
+        drawPath(window, path, currentWayPointIndex);
+    }
 }
 
 void Renderer::drawMap(sf::RenderWindow& window, const Map& map) {

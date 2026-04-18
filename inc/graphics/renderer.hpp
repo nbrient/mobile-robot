@@ -39,9 +39,10 @@ public:
      * @param target Target to draw.
      * @param path Current path planned
      * @param currentWayPointIndex Current waypoint index.
+     * @param displayPath If the path should be displayed.
      */
     void renderMap(sf::RenderWindow& window, const Map& map, const Robot& robot, const Target& target,
-                   const std::vector<Vector2Dim>& path, std::size_t currentWayPointIndex);
+                   const std::vector<Vector2Dim>& path, std::size_t currentWayPointIndex, bool displayPath);
 
 private:
     /**

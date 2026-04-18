@@ -98,7 +98,8 @@ Application::Application(const Config& config)
 
 void Application::run() {
     sf::Event event;
-    float dt = 1.0f / static_cast<float>(FRAME_RATE_LIMIT);
+    float dt{1.0f / static_cast<float>(FRAME_RATE_LIMIT)};
+    bool displayAutoPath{false};
 
     /* While window open */
     while (m_window.isOpen()) {
@@ -124,13 +125,16 @@ void Application::run() {
             m_robot.setTurnRight(sf::Keyboard::isKeyPressed(sf::Keyboard::Right) ||
                                  sf::Keyboard::isKeyPressed(sf::Keyboard::D));
 
+            displayAutoPath = false;
         } else if (m_mode == Mode::Auto) {
             updateAutoMode(dt);
+            displayAutoPath = true;
         } else {
             m_robot.setForward(false);
             m_robot.setBackward(false);
             m_robot.setTurnLeft(false);
             m_robot.setTurnRight(false);
+            displayAutoPath = false;
         }
 
         /* Check candidate position */
@@ -171,7 +175,8 @@ void Application::run() {
 
         /* Update window */
         m_window.clear();
-        m_renderer.renderMap(m_window, m_map, m_robot, m_target, m_currentPath, m_currentWayPointIndex);
+        m_renderer.renderMap(m_window, m_map, m_robot, m_target, m_currentPath, m_currentWayPointIndex,
+                             displayAutoPath);
         m_hud.renderHud(m_window, m_mode, m_targetReachedCount, m_showTargetReached);
         m_window.display();
     }
