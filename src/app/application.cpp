@@ -46,7 +46,7 @@ const uint8_t TIMER_TARGET_REACHED_DISPLAY{1u};
  * @brief Threashold angle to go forward.
  *
  */
-const float ANGLETHRESHOLD{0.15f};
+const float AUTO_ANGLE_THRESHOLD{0.15f};
 
 /**
  * @brief Cell size for path planner.
@@ -73,7 +73,24 @@ static constexpr float TARGET_MIN_DISTANCE_FROM_ROBOT_OFFSET = 50.0f;
  * @brief Maximum number of attempts when generating a target.
  */
 static constexpr int TARGET_GENERATION_MAX_ATTEMPTS = 500;
+
+/**
+ * @brief Distance threshold to consider a waypoint reached in auto mode.
+ */
+static constexpr float AUTO_WAYPOINT_REACHED_OFFSET = 8.0f;
+
+/**
+ * @brief Look-ahead distance to aim at the next waypoint in auto mode.
+ */
+static constexpr float AUTO_LOOKAHEAD_DISTANCE = 35.0f;
+
+/**
+ * @brief Large angle threshold to consider a significant turn in auto mode.
+ */
+static constexpr float AUTO_LARGE_ANGLE_THRESHOLD = 0.50f;
+
 }  // namespace
+
 Application::Application(const Config& config)
     : m_config(config),
       m_window(sf::VideoMode({config.windowWidth, config.windowHeight}), "Robot Map - First version"),
@@ -374,25 +391,46 @@ void Application::updateAutoMode(float dt) {
 
     /* Get current robot position and next way point */
     const Vector2Dim robotPosition = m_robot.getPosition();
-    const Vector2Dim wayPoint = m_currentPath[m_currentWayPointIndex];
 
-    /* If robot reach way point, pass next way point */
-    const float reachDistance = m_robot.getRadius();
-    if (distanceSquared(robotPosition, wayPoint) < (reachDistance * reachDistance)) {
-        m_currentWayPointIndex++;
+    /* Skip all already reached waypoints */
+    while (m_currentWayPointIndex < m_currentPath.size()) {
+        const Vector2Dim currentWaypoint = m_currentPath[m_currentWayPointIndex];
 
-        /* End of path */
-        if (m_currentWayPointIndex >= m_currentPath.size()) {
-            m_robot.setForward(false);
-            m_robot.setBackward(false);
-            m_robot.setTurnLeft(false);
-            m_robot.setTurnRight(false);
-            return;
+        float reachDistance = m_robot.getRadius() + AUTO_WAYPOINT_REACHED_OFFSET;
+
+        /* Last waypoint is the exact target position */
+        if ((m_currentWayPointIndex + 1U) >= m_currentPath.size()) {
+            reachDistance = m_robot.getRadius() + m_target.getRadius();
+        }
+
+        if (distanceSquared(robotPosition, currentWaypoint) < (reachDistance * reachDistance)) {
+            ++m_currentWayPointIndex;
+        } else {
+            break;
         }
     }
 
+    if (m_currentWayPointIndex >= m_currentPath.size()) {
+        m_robot.setForward(false);
+        m_robot.setBackward(false);
+        m_robot.setTurnLeft(false);
+        m_robot.setTurnRight(false);
+        return;
+    }
+
     /* Calculate vector from robot to next waypoint */
-    const Vector2Dim nextWayPoint = m_currentPath[m_currentWayPointIndex];
+    Vector2Dim nextWayPoint = m_currentPath[m_currentWayPointIndex];
+
+    /* Short look-ahead: if the current waypoint is close, aim at the next one */
+    /* This helps the robot to anticipate the path and avoid getting stuck */
+    if ((m_currentWayPointIndex + 1U) < m_currentPath.size()) {
+        const Vector2Dim currentWaypoint = m_currentPath[m_currentWayPointIndex];
+
+        if (distanceSquared(robotPosition, currentWaypoint) < (AUTO_LOOKAHEAD_DISTANCE * AUTO_LOOKAHEAD_DISTANCE)) {
+            nextWayPoint = m_currentPath[m_currentWayPointIndex + 1U];
+        }
+    }
+
     const float dx = nextWayPoint.x - robotPosition.x;
     const float dy = nextWayPoint.y - robotPosition.y;
 
@@ -412,15 +450,28 @@ void Application::updateAutoMode(float dt) {
     }
 
     /* Turn in right direction or forward if in threshold */
-    if (angleDiff > ANGLETHRESHOLD) {
-        m_robot.setForward(false);
+    if (angleDiff > AUTO_ANGLE_THRESHOLD) {
+        /* Rotate first if too far from newt waymoint angle */
+        if (angleDiff > AUTO_LARGE_ANGLE_THRESHOLD) {
+            m_robot.setForward(false);
+        } else {
+            m_robot.setForward(true);
+        }
+
         m_robot.setTurnLeft(false);
         m_robot.setTurnRight(true);
-    } else if (angleDiff < -ANGLETHRESHOLD) {
-        m_robot.setForward(false);
+    } else if (angleDiff < -AUTO_ANGLE_THRESHOLD) {
+        /* Rotate first if too far from newt waymoint angle */
+        if (angleDiff < -AUTO_LARGE_ANGLE_THRESHOLD) {
+            m_robot.setForward(false);
+        } else {
+            m_robot.setForward(true);
+        }
+
         m_robot.setTurnLeft(true);
         m_robot.setTurnRight(false);
     } else {
+        /* Well aligned: go forward */
         m_robot.setForward(true);
         m_robot.setTurnLeft(false);
         m_robot.setTurnRight(false);
