@@ -171,7 +171,7 @@ void Application::run() {
 
         /* Update window */
         m_window.clear();
-        m_renderer.renderMap(m_window, m_map, m_robot, m_target);
+        m_renderer.renderMap(m_window, m_map, m_robot, m_target, m_currentPath, m_currentWayPointIndex);
         m_hud.renderHud(m_window, m_mode, m_targetReachedCount, m_showTargetReached);
         m_window.display();
     }

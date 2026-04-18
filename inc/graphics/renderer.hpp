@@ -13,6 +13,7 @@
 
 /* Other includes */
 #include <SFML/Graphics/RenderWindow.hpp>
+#include <vector>
 
 /* Project includes */
 #include "entity/robot.hpp"
@@ -36,8 +37,11 @@ public:
      * @param map Map to draw.
      * @param robot Robot to draw.
      * @param target Target to draw.
+     * @param path Current path planned
+     * @param currentWayPointIndex Current waypoint index.
      */
-    void renderMap(sf::RenderWindow& window, const Map& map, const Robot& robot, const Target& target);
+    void renderMap(sf::RenderWindow& window, const Map& map, const Robot& robot, const Target& target,
+                   const std::vector<Vector2Dim>& path, std::size_t currentWayPointIndex);
 
 private:
     /**
@@ -71,6 +75,15 @@ private:
      * @param target Target to draw.
      */
     void drawTarget(sf::RenderWindow& window, const Target& target);
+
+    /**
+     * @brief Draw the current planned path.
+     *
+     * @param window Target render window.
+     * @param path Current path planned
+     * @param currentWayPointIndex Current waypoint index.
+     */
+    void drawPath(sf::RenderWindow& window, const std::vector<Vector2Dim>& path, std::size_t currentWayPointIndex);
 };
 
 #endif

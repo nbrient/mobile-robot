@@ -21,15 +21,22 @@
 #include "graphics/renderer.hpp"
 
 /* Implementation */
-void Renderer::renderMap(sf::RenderWindow& window, const Map& map, const Robot& robot, const Target& target) {
+void Renderer::renderMap(sf::RenderWindow& window, const Map& map, const Robot& robot, const Target& target,
+                         const std::vector<Vector2Dim>& path, std::size_t currentWayPointIndex) {
     /* Create and draw map */
     drawMap(window, map);
+
     /* Create and draw obstacles */
     drawObstacles(window, map);
+
     /* Create and draw robot */
     drawRobot(window, robot);
+
     /* Create and draw target */
     drawTarget(window, target);
+
+    /* Draw planned path */
+    drawPath(window, path, currentWayPointIndex);
 }
 
 void Renderer::drawMap(sf::RenderWindow& window, const Map& map) {
@@ -78,4 +85,36 @@ void Renderer::drawTarget(sf::RenderWindow& window, const Target& target) {
     shape.setFillColor(sf::Color::Green);
 
     window.draw(shape);
+}
+
+void Renderer::drawPath(sf::RenderWindow& window, const std::vector<Vector2Dim>& path,
+                        std::size_t currentWayPointIndex) {
+    /* Nothing to draw if not enough waypoint */
+    if (path.size() < 2U) {
+        return;
+    }
+
+    /* Draw line segments and waypoints */
+    for (std::size_t index = 0U; index < path.size(); ++index) {
+        /* Draw waypoint */
+        sf::CircleShape waypointShape(4.0f);
+        waypointShape.setOrigin(4.0f, 4.0f);
+        waypointShape.setPosition(path[index].x, path[index].y);
+
+        if (index == currentWayPointIndex) {
+            waypointShape.setFillColor(sf::Color::Cyan);
+        } else {
+            waypointShape.setFillColor(sf::Color::Yellow);
+        }
+
+        window.draw(waypointShape);
+
+        /* Draw segment to next waypoint */
+        if ((index + 1U) < path.size()) {
+            sf::Vertex line[] = {sf::Vertex(sf::Vector2f(path[index].x, path[index].y), sf::Color::Yellow),
+                                 sf::Vertex(sf::Vector2f(path[index + 1U].x, path[index + 1U].y), sf::Color::Yellow)};
+
+            window.draw(line, 2, sf::Lines);
+        }
+    }
 }
