@@ -55,22 +55,27 @@ std::vector<Vector2Dim> PathPlanner::computePath(const Map& map, float robotRadi
     const int gridWidth = static_cast<int>(map.getWidth() / m_cellSize);
     const int gridHeight = static_cast<int>(map.getHeight() / m_cellSize);
 
+    printf("[PLANNER] start=(%.1f, %.1f) target=(%.1f, %.1f)\n", start.x, start.y, target.x, target.y);
+
     /* Converts start point and target point to grid cell */
     const GridCell startCell = worldToGrid(start);
     const GridCell targetCell = worldToGrid(target);
 
     /* Check start and target are on grid */
     if ((startCell.x < 0) || (startCell.x >= gridWidth) || (startCell.y < 0) || (startCell.y >= gridHeight)) {
+        printf("[PLANNER] ERROR start or target outside grid\n");
         return {};
     }
 
     if ((targetCell.x < 0) || (targetCell.x >= gridWidth) || (targetCell.y < 0) || (targetCell.y >= gridHeight)) {
+        printf("[PLANNER] ERROR start or target outside grid\n");
         return {};
     }
 
     /* Check that start and target are not blocked */
     if (isCellBlocked(map, robotRadius, startCell.x, startCell.y) ||
         isCellBlocked(map, robotRadius, targetCell.x, targetCell.y)) {
+        printf("[PLANNER] ERROR start or target blocked\n");
         return {};
     }
 

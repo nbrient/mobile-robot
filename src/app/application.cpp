@@ -53,6 +53,26 @@ const float ANGLETHRESHOLD{0.15f};
  *
  */
 const float cellSize{20.0f};
+
+/**
+ * @brief Additional safety margin applied to target generation near borders.
+ */
+static constexpr float TARGET_BORDER_SAFETY_MARGIN_OFFSET = 12.0f;
+
+/**
+ * @brief Additional safety margin applied between target and obstacles.
+ */
+static constexpr float TARGET_OBSTACLE_SAFETY_MARGIN = 12.0f;
+
+/**
+ * @brief Additional minimum distance required between robot and target.
+ */
+static constexpr float TARGET_MIN_DISTANCE_FROM_ROBOT_OFFSET = 50.0f;
+
+/**
+ * @brief Maximum number of attempts when generating a target.
+ */
+static constexpr int TARGET_GENERATION_MAX_ATTEMPTS = 500;
 }  // namespace
 Application::Application(const Config& config)
     : m_config(config),
@@ -119,6 +139,9 @@ void Application::run() {
         if (isRobotPositionValid(candidatePosition)) {
             m_robot.setPosition(candidatePosition);
         } else {
+            printf("[MOVE] blocked robot=(%.1f, %.1f) candidate=(%.1f, %.1f) count=%d\n", m_robot.getPosition().x,
+                   m_robot.getPosition().y, candidatePosition.x, candidatePosition.y, m_targetReachedCount);
+
             if (m_mode == Mode::Auto) {
                 recomputePath();
             }
@@ -128,6 +151,10 @@ void Application::run() {
             m_targetReachedCount++;
             m_showTargetReached = true;
             m_targetReachedTimer = TIMER_TARGET_REACHED_DISPLAY;
+
+            printf("[TARGET] reached count=%d robot=(%.1f, %.1f) target=(%.1f, %.1f)\n", m_targetReachedCount,
+                   m_robot.getPosition().x, m_robot.getPosition().y, m_target.getPosition().x,
+                   m_target.getPosition().y);
 
             generateTargetPosition();
         }
@@ -184,11 +211,14 @@ bool Application::isRobotPositionValid(const Vector2Dim& candidatePosition) cons
 }
 
 void Application::generateTargetPosition() {
-    std::uniform_real_distribution<float> xDist(m_target.getRadius(), m_map.getWidth() - m_target.getRadius());
+    /* Create border margin */
+    const float borderSafetyMargin = m_robot.getRadius() + TARGET_BORDER_SAFETY_MARGIN_OFFSET;
 
-    std::uniform_real_distribution<float> yDist(m_target.getRadius(), m_map.getHeight() - m_target.getRadius());
+    std::uniform_real_distribution<float> xDist(borderSafetyMargin, m_map.getWidth() - borderSafetyMargin);
 
-    for (int attempt = 0; attempt < 500; ++attempt) {
+    std::uniform_real_distribution<float> yDist(borderSafetyMargin, m_map.getHeight() - borderSafetyMargin);
+
+    for (int attempt = 0; attempt < TARGET_GENERATION_MAX_ATTEMPTS; ++attempt) {
         const Vector2Dim candidatePosition = {xDist(m_rng), yDist(m_rng)};
 
         if (isTargetPositionValid(candidatePosition)) {
@@ -201,26 +231,39 @@ void Application::generateTargetPosition() {
         }
     }
 
-    const float margin = m_target.getRadius() + 5.0f;
-    m_target.setPosition({m_map.getWidth() - margin, m_map.getHeight() - margin});
-
-    if (m_mode == Mode::Auto) {
-        recomputePath();
-    }
+    printf("[TARGET] ERROR no valid target found after %d attempts\n", TARGET_GENERATION_MAX_ATTEMPTS);
 }
 
 bool Application::isTargetPositionValid(const Vector2Dim& candidatePosition) const {
-    /* Check target no too close to the robot */
-    const float minDistanceToRobot = m_robot.getRadius() + m_target.getRadius() + 50.0f;
+    /* Create margin to create a reachable target */
+    const float borderSafetyMargin = m_robot.getRadius() + TARGET_BORDER_SAFETY_MARGIN_OFFSET;
+    const float minDistanceToRobot = m_robot.getRadius() + m_target.getRadius() + TARGET_MIN_DISTANCE_FROM_ROBOT_OFFSET;
+
+    /* Check distance to map borders */
+    if ((candidatePosition.x - borderSafetyMargin) < 0.0f) {
+        return false;
+    }
+
+    if ((candidatePosition.y - borderSafetyMargin) < 0.0f) {
+        return false;
+    }
+
+    if ((candidatePosition.x + borderSafetyMargin) > m_map.getWidth()) {
+        return false;
+    }
+
+    if ((candidatePosition.y + borderSafetyMargin) > m_map.getHeight()) {
+        return false;
+    }
 
     /* Check if target touching robot */
     if (distanceSquared(candidatePosition, m_robot.getPosition()) < (minDistanceToRobot * minDistanceToRobot)) {
         return false;
     }
 
-    /* Check if target touching an obstacle */
+    /* Check if target touching an obstacle and reachable by robot */
     for (const auto& obstacle : m_map.getObstacles()) {
-        const float collisionDistance = m_target.getRadius() + obstacle.radius;
+        const float collisionDistance = m_robot.getRadius() + obstacle.radius + TARGET_OBSTACLE_SAFETY_MARGIN;
 
         if (distanceSquared(candidatePosition, obstacle.center) < (collisionDistance * collisionDistance)) {
             return false;
@@ -297,6 +340,18 @@ void Application::recomputePath() {
 
     /* Reset first point to reach */
     m_currentWayPointIndex = 0U;
+
+    printf("[PATH] recompute robot=(%.1f, %.1f) target=(%.1f, %.1f) pathSize=%zu wayPointIndex=%zu count=%d\n",
+           m_robot.getPosition().x, m_robot.getPosition().y, m_target.getPosition().x, m_target.getPosition().y,
+           m_currentPath.size(), m_currentWayPointIndex, m_targetReachedCount);
+
+    if (!m_currentPath.empty()) {
+        printf("[PATH] first wayPoint=(%.1f, %.1f)\n",
+               m_currentPath[m_currentWayPointIndex < m_currentPath.size() ? m_currentWayPointIndex : 0U].x,
+               m_currentPath[m_currentWayPointIndex < m_currentPath.size() ? m_currentWayPointIndex : 0U].y);
+    } else {
+        printf("[PATH] WARNING empty path\n");
+    }
 }
 
 void Application::updateAutoMode(float dt) {
