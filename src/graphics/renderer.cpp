@@ -53,9 +53,9 @@ void Renderer::drawMap(sf::RenderWindow& window, const Map& map) {
 
 void Renderer::drawObstacles(sf::RenderWindow& window, const Map& map) {
     for (const auto& obstacle : map.getObstacles()) {
-        sf::CircleShape shape(obstacle.radius);
-        shape.setOrigin({obstacle.radius, obstacle.radius});
-        shape.setPosition({obstacle.center.x, obstacle.center.y});
+        sf::CircleShape shape(obstacle.m_radius);
+        shape.setOrigin({obstacle.m_radius, obstacle.m_radius});
+        shape.setPosition({obstacle.m_center.x, obstacle.m_center.y});
         shape.setFillColor(sf::Color(180, 70, 70));
 
         window.draw(shape);

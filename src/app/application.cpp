@@ -226,10 +226,10 @@ bool Application::isRobotPositionValid(const Vector2Dim& candidatePosition) cons
 
     /* Check robot collison with obstacles */
     for (const auto& obstacle : m_map.getObstacles()) {
-        const float collisionDistance = robotRadius + obstacle.radius;
+        const float collisionDistance = robotRadius + obstacle.m_radius;
 
         /* No need to calculate simple distance, comparison on squared if more efficient */
-        if (distanceSquared(candidatePosition, obstacle.center) < (collisionDistance * collisionDistance)) {
+        if (distanceSquared(candidatePosition, obstacle.m_center) < (collisionDistance * collisionDistance)) {
             return false;
         }
     }
@@ -296,9 +296,9 @@ bool Application::isTargetPositionValid(const Vector2Dim& candidatePosition) con
 
     /* Check if target touching an obstacle and reachable by robot */
     for (const auto& obstacle : m_map.getObstacles()) {
-        const float collisionDistance = m_robot.getRadius() + obstacle.radius + TARGET_OBSTACLE_SAFETY_MARGIN;
+        const float collisionDistance = m_robot.getRadius() + obstacle.m_radius + TARGET_OBSTACLE_SAFETY_MARGIN;
 
-        if (distanceSquared(candidatePosition, obstacle.center) < (collisionDistance * collisionDistance)) {
+        if (distanceSquared(candidatePosition, obstacle.m_center) < (collisionDistance * collisionDistance)) {
             return false;
         }
     }

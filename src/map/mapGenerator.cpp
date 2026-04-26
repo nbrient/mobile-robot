@@ -52,8 +52,8 @@ void MapGenerator::generateNewObstacle(Map& map, const Config& config, const Vec
 
         Obstacle obstacle;
         /* Create random obstacle */
-        obstacle.center = {xDist(m_rng), yDist(m_rng)};
-        obstacle.radius = radiusDist(m_rng);
+        obstacle.m_center = {xDist(m_rng), yDist(m_rng)};
+        obstacle.m_radius = radiusDist(m_rng);
 
         /* Check if obstacle is valid */
         if (isObstacleValid(map, obstacle, robotPosition, robotRadius)) {
@@ -66,25 +66,25 @@ void MapGenerator::generateNewObstacle(Map& map, const Config& config, const Vec
 bool MapGenerator::isObstacleValid(const Map& map, const Obstacle& obstacle, const Vector2Dim& robotPosition,
                                    const float robotRadius) const {
     /* Check if obstacle is in the map */
-    if (obstacle.center.x - obstacle.radius < 0.0f || obstacle.center.x + obstacle.radius > map.getWidth()) {
+    if (obstacle.m_center.x - obstacle.m_radius < 0.0f || obstacle.m_center.x + obstacle.m_radius > map.getWidth()) {
         return false;
     }
-    if (obstacle.center.y - obstacle.radius < 0.0f || obstacle.center.y + obstacle.radius > map.getHeight()) {
+    if (obstacle.m_center.y - obstacle.m_radius < 0.0f || obstacle.m_center.y + obstacle.m_radius > map.getHeight()) {
         return false;
     }
 
     /* Check obstacle not touching an other obstacle */
     for (const auto& other : map.getObstacles()) {
-        const float minDist = obstacle.radius + other.radius + 10.0f;
+        const float minDist = obstacle.m_radius + other.m_radius + 10.0f;
 
-        if (distanceSquared(obstacle.center, other.center) < (minDist * minDist)) {
+        if (distanceSquared(obstacle.m_center, other.m_center) < (minDist * minDist)) {
             return false;
         }
     }
 
-    const float minDist = obstacle.radius + robotRadius + 10.0f;
+    const float minDist = obstacle.m_radius + robotRadius + 10.0f;
 
-    if (distanceSquared(obstacle.center, robotPosition) < (minDist * minDist)) {
+    if (distanceSquared(obstacle.m_center, robotPosition) < (minDist * minDist)) {
         return false;
     }
 

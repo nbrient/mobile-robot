@@ -26,12 +26,12 @@ struct Obstacle {
     /**
      * @brief Center position of the obstacle.
      */
-    Vector2Dim center;
+    Vector2Dim m_center;
 
     /**
      * @brief Radius of the obstacle.
      */
-    float radius{20.0f};
+    float m_radius{20.0f};
 };
 
 #endif

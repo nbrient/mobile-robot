@@ -200,8 +200,8 @@ bool PathPlanner::isCellBlocked(const Map& map, float robotRadius, int cellX, in
 
     /* Check proximity of the cell to obstacles */
     for (const auto& obstacle : map.getObstacles()) {
-        const float minDistance = robotRadius + obstacle.radius + obstacleAdditionalMargin;
-        if (distanceSquared(position, obstacle.center) < (minDistance * minDistance)) {
+        const float minDistance = robotRadius + obstacle.m_radius + obstacleAdditionalMargin;
+        if (distanceSquared(position, obstacle.m_center) < (minDistance * minDistance)) {
             return true;
         }
     }
@@ -214,6 +214,6 @@ GridCell PathPlanner::worldToGrid(const Vector2Dim& position) const {
 }
 
 Vector2Dim PathPlanner::gridToWorld(const GridCell& cell) const {
-    /* Take cell center */
+    /* Take cell m_center */
     return {(static_cast<float>(cell.x) + 0.5f) * m_cellSize, (static_cast<float>(cell.y) + 0.5f) * m_cellSize};
 }
