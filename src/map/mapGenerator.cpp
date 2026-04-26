@@ -39,15 +39,15 @@ void MapGenerator::generateNewObstacle(Map& map, const Config& config, const Vec
     map.clearObstacles();
 
     /* Create random floating point */
-    std::uniform_real_distribution<float> xDist(0.0f, config.mapWidth);
-    std::uniform_real_distribution<float> yDist(0.0f, config.mapHeight);
-    std::uniform_real_distribution<float> radiusDist(config.obstacleMinSize, config.obstacleMaxSize);
+    std::uniform_real_distribution<float> xDist(0.0f, config.m_mapWidth);
+    std::uniform_real_distribution<float> yDist(0.0f, config.m_mapHeight);
+    std::uniform_real_distribution<float> radiusDist(config.m_obstacleMinSize, config.m_obstacleMaxSize);
 
     std::size_t created = 0u;
     std::size_t attempts = 0u;
-    const std::size_t maxAttempts = config.obstacleCount * 10u;
+    const std::size_t maxAttempts = config.m_obstacleCount * 10u;
 
-    while (created < config.obstacleCount && attempts < maxAttempts) {
+    while (created < config.m_obstacleCount && attempts < maxAttempts) {
         attempts++;
 
         Obstacle obstacle;

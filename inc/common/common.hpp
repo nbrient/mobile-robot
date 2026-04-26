@@ -32,6 +32,19 @@ struct Vector2Dim {
 };
 
 /**
+ * @brief Grid cell coordinate.
+ */
+struct GridCell {
+    int x;
+    int y;
+};
+
+/**
+ * @brief Supported path planner types.
+ */
+enum class PathPlannerType { BFS };
+
+/**
  * @brief Compute squared distance between two points.
  *
  * @param first First point.

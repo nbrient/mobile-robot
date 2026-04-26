@@ -19,5 +19,6 @@
   },
   "target":{
     "size" : 12.0
-  }
+  },
+  "pathPlannerType": "BFS"
 }

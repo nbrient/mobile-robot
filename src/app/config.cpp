@@ -69,11 +69,11 @@ Config Config::loadFromFile(const std::string& filePath) {
         const auto& window = jsonData.at("window");
 
         if (window.contains("width")) {
-            config.windowWidth = window.at("width").get<unsigned int>();
+            config.m_windowWidth = window.at("width").get<unsigned int>();
         }
 
         if (window.contains("height")) {
-            config.windowHeight = window.at("height").get<unsigned int>();
+            config.m_windowHeight = window.at("height").get<unsigned int>();
         }
     }
 
@@ -81,27 +81,27 @@ Config Config::loadFromFile(const std::string& filePath) {
         const auto& map = jsonData.at("map");
 
         if (map.contains("width")) {
-            config.mapWidth = map.at("width").get<float>();
+            config.m_mapWidth = map.at("width").get<float>();
         }
 
         if (map.contains("height")) {
-            config.mapHeight = map.at("height").get<float>();
+            config.m_mapHeight = map.at("height").get<float>();
         }
 
         if (map.contains("obstacleCount")) {
-            config.obstacleCount = map.at("obstacleCount").get<std::size_t>();
+            config.m_obstacleCount = map.at("obstacleCount").get<std::size_t>();
         }
 
         if (map.contains("obstacleMinSize")) {
-            config.obstacleMinSize = map.at("obstacleMinSize").get<float>();
+            config.m_obstacleMinSize = map.at("obstacleMinSize").get<float>();
         }
 
         if (map.contains("obstacleMaxSize")) {
-            config.obstacleMaxSize = map.at("obstacleMaxSize").get<float>();
+            config.m_obstacleMaxSize = map.at("obstacleMaxSize").get<float>();
         }
 
         if (map.contains("randomSeed")) {
-            config.randomSeed = map.at("randomSeed").get<unsigned int>();
+            config.m_randomSeed = map.at("randomSeed").get<unsigned int>();
         }
     }
 
@@ -109,19 +109,19 @@ Config Config::loadFromFile(const std::string& filePath) {
         const auto& robot = jsonData.at("robot");
 
         if (robot.contains("size")) {
-            config.robotSize = robot.at("size").get<float>();
+            config.m_robotSize = robot.at("size").get<float>();
         }
 
         if (robot.contains("robotLineDirectionSize")) {
-            config.robotLineDirectionSize = robot.at("robotLineDirectionSize").get<float>();
+            config.m_robotLineDirectionSize = robot.at("robotLineDirectionSize").get<float>();
         }
 
         if (robot.contains("defaultX")) {
-            config.defaultRobotX = robot.at("defaultX").get<float>();
+            config.m_defaultRobotX = robot.at("defaultX").get<float>();
         }
 
         if (robot.contains("defaultY")) {
-            config.defaultRobotY = robot.at("defaultY").get<float>();
+            config.m_defaultRobotY = robot.at("defaultY").get<float>();
         }
     }
 
@@ -129,7 +129,7 @@ Config Config::loadFromFile(const std::string& filePath) {
         const auto& target = jsonData.at("target");
 
         if (target.contains("size")) {
-            config.targetSize = target.at("size").get<float>();
+            config.m_targetSize = target.at("size").get<float>();
         }
     }
 

@@ -17,6 +17,9 @@
 #include <cstddef>
 #include <string>
 
+/* Project includes */
+#include "common/common.hpp"
+
 /* Declarations */
 
 /**
@@ -29,67 +32,67 @@ struct Config {
     /**
      * @brief Window width in pixels.
      */
-    unsigned int windowWidth{1000u};
+    unsigned int m_windowWidth{1000u};
 
     /**
      * @brief Window height in pixels.
      */
-    unsigned int windowHeight{800u};
+    unsigned int m_windowHeight{800u};
 
     /**
      * @brief Map width in world units.
      */
-    float mapWidth{1000.0f};
+    float m_mapWidth{1000.0f};
 
     /**
      * @brief Map height in world units.
      */
-    float mapHeight{800.0f};
+    float m_mapHeight{800.0f};
 
     /**
      * @brief Number of obstacles to generate.
      */
-    std::size_t obstacleCount{10u};
+    std::size_t m_obstacleCount{10u};
 
     /**
      * @brief Minimum size of generated obstacles.
      */
-    float obstacleMinSize{5.0f};
+    float m_obstacleMinSize{5.0f};
 
     /**
      * @brief Maximum size of generated obstacles.
      */
-    float obstacleMaxSize{10.0f};
+    float m_obstacleMaxSize{10.0f};
 
     /**
      * @brief Seed used by the random generator.
      */
-    unsigned int randomSeed{10u};
+    unsigned int m_randomSeed{10u};
 
     /**
      * @brief Robot size.
      */
-    float robotSize{10.0f};
+    float m_robotSize{10.0f};
 
     /**
      * @brief Length of the robot direction line.
      */
-    float robotLineDirectionSize{10.0f};
+    float m_robotLineDirectionSize{10.0f};
 
     /**
      * @brief Default X position for robot.
      */
-    float defaultRobotX{100.0};
+    float m_defaultRobotX{100.0};
 
     /**
      * @brief Default Y position for robot.
      */
-    float defaultRobotY{100.0};
+    float m_defaultRobotY{100.0};
 
     /**
      * @brief Size of the radius of target.
      */
-    float targetSize{10.0f};
+    float m_targetSize{10.0f};
 
     /**
      * @brief Load configuration from a JSON file.
@@ -103,6 +106,11 @@ struct Config {
      * @throw std::runtime_error If the file cannot be opened.
      */
     static Config loadFromFile(const std::string& filePath);
+
+    /**
+     * @brief Path planner algorithm to use.
+     */
+    PathPlannerType m_pathPlannerType{PathPlannerType::BFS};
 };
 
 #endif

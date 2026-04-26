@@ -21,11 +21,16 @@
 
 /* Other includes */
 #include <SFML/Window/Event.hpp>
+#include <cmath>
+#include <cstdint>
+#include <cstdio>
+#include <memory>
 #include <optional>
 
 /* Project includes */
 #include "app/application.hpp"
 #include "entity/robot.hpp"
+#include "nav/bfsPathPlanner.hpp"
 
 /* Implementation */
 namespace {
@@ -98,17 +103,17 @@ static constexpr float AUTO_LARGE_ANGLE_THRESHOLD = 0.50f;
 
 Application::Application(const Config& config)
     : m_config(config),
-      m_window(sf::VideoMode({config.windowWidth, config.windowHeight}), "Robot Map - First version"),
-      m_map(config.mapWidth, config.mapHeight),
-      m_robot(config.robotSize, config.robotLineDirectionSize, config.defaultRobotX, config.defaultRobotY),
-      m_target(config.targetSize),
-      m_rng(config.randomSeed + 123u),
-      m_mapGenerator(config.randomSeed),
+      m_window(sf::VideoMode({config.m_windowWidth, config.m_windowHeight}), "Robot Map - First version"),
+      m_map(config.m_mapWidth, config.m_mapHeight),
+      m_robot(config.m_robotSize, config.m_robotLineDirectionSize, config.m_defaultRobotX, config.m_defaultRobotY),
+      m_target(config.m_targetSize),
+      m_rng(config.m_randomSeed + 123u),
+      m_mapGenerator(config.m_randomSeed),
       m_targetReachedCount(0),
       m_showTargetReached(false),
       m_targetReachedTimer(0.0f),
       m_mode(Mode::Manual),
-      m_pathPlanner(cellSize),
+      m_pathPlanner(std::make_unique<BfsPathPlanner>(cellSize)),
       m_currentWayPointIndex(0U) {
     m_window.setFramerateLimit(FRAME_RATE_LIMIT);
     m_mapGenerator.generateNewObstacle(m_map, m_config, m_robot.getPosition(), m_robot.getRadius());
@@ -250,7 +255,7 @@ void Application::generateTargetPosition() {
         /* Check if candidate position is valid and reachable by the robot */
         if (isTargetPositionValid(candidatePosition)) {
             const std::vector<Vector2Dim> candidatePath =
-                m_pathPlanner.computePath(m_map, m_robot.getRadius(), m_robot.getPosition(), candidatePosition);
+                m_pathPlanner->computePath(m_map, m_robot.getRadius(), m_robot.getPosition(), candidatePosition);
 
             /* If path is empty, the target is not reachable, try another position */
             if (!candidatePath.empty()) {
@@ -313,7 +318,7 @@ bool Application::isTargetReached() const {
 }
 
 void Application::regenerateMapAndTarget() {
-    m_robot.setPosition({m_config.defaultRobotX, m_config.defaultRobotY});
+    m_robot.setPosition({m_config.m_defaultRobotX, m_config.m_defaultRobotY});
     m_mode = Mode::Manual;
     m_mapGenerator.generateNewObstacle(m_map, m_config, m_robot.getPosition(), m_robot.getRadius());
     generateTargetPosition();
@@ -368,7 +373,7 @@ void Application::handleSingleKeyActions(const sf::Event& event) {
 
 void Application::recomputePath() {
     m_currentPath =
-        m_pathPlanner.computePath(m_map, m_robot.getRadius(), m_robot.getPosition(), m_target.getPosition());
+        m_pathPlanner->computePath(m_map, m_robot.getRadius(), m_robot.getPosition(), m_target.getPosition());
 
     /* Reset first point to reach */
     if (m_currentPath.size() > 1U) {

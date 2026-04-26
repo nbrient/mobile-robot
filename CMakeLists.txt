@@ -17,8 +17,8 @@ add_executable(robot_target
     src/graphics/renderer.cpp
     src/graphics/hud.cpp
     src/entity/robot.cpp
-    src/entity/target.cpp
     src/nav/pathPlanner.cpp
+    src/nav/bfsPathPlanner.cpp
 )
 
 target_include_directories(robot_target

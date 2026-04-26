@@ -21,6 +21,7 @@
 
 /* Other includes */
 #include <SFML/Graphics/RenderWindow.hpp>
+#include <memory>
 #include <random>
 #include <vector>
 
@@ -190,9 +191,9 @@ private:
     Hud m_hud;
 
     /**
-     * @brief Grid-based path planner.
+     * @brief Selected grid-based path planner.
      */
-    PathPlanner m_pathPlanner;
+    std::unique_ptr<PathPlanner> m_pathPlanner;
 
     /**
      * @brief Current sequence of waypoints.

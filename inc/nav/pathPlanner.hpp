@@ -1,13 +1,14 @@
-#ifndef NAVIGATION_PATHPLANNER_HPP
-#define NAVIGATION_PATHPLANNER_HPP
+#ifndef NAV_PATH_PLANNER_HPP
+#define NAV_PATH_PLANNER_HPP
 
 /**
  * @file pathPlanner.hpp
  *
- * @brief Path planner declaration.
+ * @brief Common path planner base class declaration.
  *
- * @details This file declares a very simple BFS planner operating on a 2D grid built from the current map and robot
- * radius.
+ * @details
+ * This file declares the PathPlanner base class used to share common grid
+ * utilities between several path planning algorithms.
  *
  * @version 1.0
  */
@@ -22,41 +23,43 @@
 /* Declarations */
 
 /**
- * @brief Grid cell coordinate.
- */
-struct GridCell {
-    int x;
-    int y;
-};
-
-/**
- * @brief Simple BFS path planner on a 2D grid.
+ * @brief Common grid based path planner.
+ *
+ * @details
+ * This class stores the grid cell size and provides helper methods used by
+ * derived path planners. The path search algorithm itself is implemented by
+ * child classes.
  */
 class PathPlanner {
 public:
     /**
-     * @brief Construct a planner with a fixed cell size.
+     * @brief Construct a path planner with a fixed grid cell size.
      *
      * @param cellSize Grid cell size in world units.
      */
     explicit PathPlanner(float cellSize);
 
     /**
-     * @brief Compute a path from start to goal.
+     * @brief Virtual destructor.
+     */
+    virtual ~PathPlanner() = default;
+
+    /**
+     * @brief Compute a path from start position to target position.
      *
      * @param map Current map.
-     * @param robotRadius Current robot radius
+     * @param robotRadius Current robot radius.
      * @param start Start world position.
-     * @param goal Goal world position.
+     * @param target Target world position.
      *
-     * @return Sequence of waypoints.
+     * @return Sequence of waypoints in world coordinates.
      */
-    std::vector<Vector2Dim> computePath(const Map& map, float robotRadius, const Vector2Dim& start,
-                                        const Vector2Dim& goal) const;
+    virtual std::vector<Vector2Dim> computePath(const Map& map, float robotRadius, const Vector2Dim& start,
+                                                const Vector2Dim& target) const = 0;
 
-private:
+protected:
     /**
-     * @brief Check if a grid cell is blocked.
+     * @brief Check if a grid cell is blocked for the robot.
      *
      * @param map Current map.
      * @param robotRadius Current robot radius.
@@ -85,9 +88,9 @@ private:
      */
     Vector2Dim gridToWorld(const GridCell& cell) const;
 
-private:
+protected:
     /**
-     * @brief Grid cell size.
+     * @brief Grid cell size in world units.
      */
     float m_cellSize;
 };
