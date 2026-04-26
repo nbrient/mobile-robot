@@ -65,6 +65,11 @@ static constexpr float TARGET_BORDER_SAFETY_MARGIN_OFFSET = 12.0f;
 static constexpr float TARGET_OBSTACLE_SAFETY_MARGIN = 12.0f;
 
 /**
+ * @brief Additional safety margin applied between target and robot.
+ */
+static constexpr float TARGET_REACHED_MARGIN = 12.0f;
+
+/**
  * @brief Additional minimum distance required between robot and target.
  */
 static constexpr float TARGET_MIN_DISTANCE_FROM_ROBOT_OFFSET = 50.0f;
@@ -233,7 +238,6 @@ bool Application::isRobotPositionValid(const Vector2Dim& candidatePosition) cons
 }
 
 void Application::generateTargetPosition() {
-    /* Create border margin */
     const float borderSafetyMargin = m_robot.getRadius() + TARGET_BORDER_SAFETY_MARGIN_OFFSET;
 
     std::uniform_real_distribution<float> xDist(borderSafetyMargin, m_map.getWidth() - borderSafetyMargin);
@@ -243,13 +247,20 @@ void Application::generateTargetPosition() {
     for (int attempt = 0; attempt < TARGET_GENERATION_MAX_ATTEMPTS; ++attempt) {
         const Vector2Dim candidatePosition = {xDist(m_rng), yDist(m_rng)};
 
+        /* Check if candidate position is valid and reachable by the robot */
         if (isTargetPositionValid(candidatePosition)) {
-            m_target.setPosition(candidatePosition);
+            const std::vector<Vector2Dim> candidatePath =
+                m_pathPlanner.computePath(m_map, m_robot.getRadius(), m_robot.getPosition(), candidatePosition);
 
-            if (m_mode == Mode::Auto) {
-                recomputePath();
+            /* If path is empty, the target is not reachable, try another position */
+            if (!candidatePath.empty()) {
+                m_target.setPosition(candidatePosition);
+
+                if (m_mode == Mode::Auto) {
+                    recomputePath();
+                }
+                return;
             }
-            return;
         }
     }
 
@@ -296,7 +307,7 @@ bool Application::isTargetPositionValid(const Vector2Dim& candidatePosition) con
 }
 
 bool Application::isTargetReached() const {
-    const float reachDistance = m_robot.getRadius() + m_target.getRadius();
+    const float reachDistance = m_robot.getRadius() + m_target.getRadius() - TARGET_REACHED_MARGIN;
 
     return distanceSquared(m_robot.getPosition(), m_target.getPosition()) < (reachDistance * reachDistance);
 }
@@ -356,28 +367,32 @@ void Application::handleSingleKeyActions(const sf::Event& event) {
 }
 
 void Application::recomputePath() {
-    /* Calculates path to target */
     m_currentPath =
         m_pathPlanner.computePath(m_map, m_robot.getRadius(), m_robot.getPosition(), m_target.getPosition());
 
     /* Reset first point to reach */
-    m_currentWayPointIndex = 0U;
+    if (m_currentPath.size() > 1U) {
+        m_currentWayPointIndex = 1U;
+    } else {
+        m_currentWayPointIndex = 0U;
+    }
 
     printf("[PATH] recompute robot=(%.1f, %.1f) target=(%.1f, %.1f) pathSize=%zu wayPointIndex=%zu count=%d\n",
            m_robot.getPosition().x, m_robot.getPosition().y, m_target.getPosition().x, m_target.getPosition().y,
            m_currentPath.size(), m_currentWayPointIndex, m_targetReachedCount);
 
     if (!m_currentPath.empty()) {
-        printf("[PATH] first wayPoint=(%.1f, %.1f)\n",
-               m_currentPath[m_currentWayPointIndex < m_currentPath.size() ? m_currentWayPointIndex : 0U].x,
-               m_currentPath[m_currentWayPointIndex < m_currentPath.size() ? m_currentWayPointIndex : 0U].y);
+        printf("[PATH] first wayPoint=(%.1f, %.1f)\n", m_currentPath[m_currentWayPointIndex].x,
+               m_currentPath[m_currentWayPointIndex].y);
     } else {
         printf("[PATH] WARNING empty path\n");
+        if (m_mode == Mode::Auto) {
+            generateTargetPosition();
+        }
     }
 }
 
 void Application::updateAutoMode(float dt) {
-    /* Unused actually */
     (void)dt;
 
     /* If path is empty, stop the robot */
@@ -389,7 +404,6 @@ void Application::updateAutoMode(float dt) {
         return;
     }
 
-    /* Get current robot position and next way point */
     const Vector2Dim robotPosition = m_robot.getPosition();
 
     /* Skip all already reached waypoints */
@@ -400,7 +414,7 @@ void Application::updateAutoMode(float dt) {
 
         /* Last waypoint is the exact target position */
         if ((m_currentWayPointIndex + 1U) >= m_currentPath.size()) {
-            reachDistance = m_robot.getRadius() + m_target.getRadius();
+            reachDistance = m_robot.getRadius() + m_target.getRadius() - TARGET_REACHED_MARGIN;
         }
 
         if (distanceSquared(robotPosition, currentWaypoint) < (reachDistance * reachDistance)) {
@@ -410,7 +424,8 @@ void Application::updateAutoMode(float dt) {
         }
     }
 
-    if (m_currentWayPointIndex >= m_currentPath.size()) {
+    /* If target is really reached, stop */
+    if (isTargetReached() || m_currentWayPointIndex >= m_currentPath.size()) {
         m_robot.setForward(false);
         m_robot.setBackward(false);
         m_robot.setTurnLeft(false);
@@ -421,8 +436,7 @@ void Application::updateAutoMode(float dt) {
     /* Calculate vector from robot to next waypoint */
     Vector2Dim nextWayPoint = m_currentPath[m_currentWayPointIndex];
 
-    /* Short look-ahead: if the current waypoint is close, aim at the next one */
-    /* This helps the robot to anticipate the path and avoid getting stuck */
+    /* Optional short look-ahead */
     if ((m_currentWayPointIndex + 1U) < m_currentPath.size()) {
         const Vector2Dim currentWaypoint = m_currentPath[m_currentWayPointIndex];
 

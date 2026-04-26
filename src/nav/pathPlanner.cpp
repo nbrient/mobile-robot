@@ -73,9 +73,12 @@ std::vector<Vector2Dim> PathPlanner::computePath(const Map& map, float robotRadi
     }
 
     /* Check that start and target are not blocked */
-    if (isCellBlocked(map, robotRadius, startCell.x, startCell.y) ||
-        isCellBlocked(map, robotRadius, targetCell.x, targetCell.y)) {
-        printf("[PLANNER] ERROR start or target blocked\n");
+    const bool isStartBlocked = isCellBlocked(map, robotRadius, startCell.x, startCell.y);
+    const bool isTargetBlocked = isCellBlocked(map, robotRadius, targetCell.x, targetCell.y);
+
+    if (isStartBlocked || isTargetBlocked) {
+        printf("[PLANNER] ERROR blocked start=%d target=%d startCell=(%d,%d) targetCell=(%d,%d)\n",
+               isStartBlocked ? 1 : 0, isTargetBlocked ? 1 : 0, startCell.x, startCell.y, targetCell.x, targetCell.y);
         return {};
     }
 

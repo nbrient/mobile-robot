@@ -110,7 +110,14 @@ private:
     void recomputePath();
 
     /**
-     * @brief Update robot state in auto mode.
+     * @brief Update robot behavior in auto mode by following waypoints.
+     *
+     * @details
+     * The robot follows intermediate waypoints from the planner, but the final
+     * objective is always the exact target position.
+     *
+     * Intermediate waypoints can be skipped when reached.
+     * The last waypoint is never fully consumed until the real target is reached.
      *
      * @param dt Time step in seconds.
      */
