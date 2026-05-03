@@ -20,5 +20,5 @@
   "target":{
     "size" : 12.0
   },
-  "pathPlannerType": "BFS"
+  "pathPlannerType": "A_STAR"
 }

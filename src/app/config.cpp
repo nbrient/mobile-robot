@@ -133,5 +133,16 @@ Config Config::loadFromFile(const std::string& filePath) {
         }
     }
 
+    if (jsonData.contains("pathPlannerType")) {
+        const std::string& plannerTypeString = jsonData.at("pathPlannerType").get<std::string>();
+        if (plannerTypeString == "A_STAR") {
+            config.m_pathPlannerType = PathPlannerType::A_STAR;
+        } else {
+            config.m_pathPlannerType = PathPlannerType::BFS;
+        }
+    } else {
+        config.m_pathPlannerType = PathPlannerType::BFS;
+    }
+
     return config;
 }

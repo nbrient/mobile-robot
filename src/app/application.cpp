@@ -30,6 +30,7 @@
 /* Project includes */
 #include "app/application.hpp"
 #include "entity/robot.hpp"
+#include "nav/aStarPathPlanner.hpp"
 #include "nav/bfsPathPlanner.hpp"
 
 /* Implementation */
@@ -99,6 +100,22 @@ static constexpr float AUTO_LOOKAHEAD_DISTANCE = 35.0f;
  */
 static constexpr float AUTO_LARGE_ANGLE_THRESHOLD = 0.50f;
 
+/**
+ * @brief Create the path planner instance selected in the configuration.
+ *
+ * @param plannerType Selected planner type.
+ * @param plannerCellSize Grid cell size in world units.
+ *
+ * @return New path planner instance.
+ */
+std::unique_ptr<PathPlanner> createPathPlanner(PathPlannerType plannerType, float plannerCellSize) {
+    if (plannerType == PathPlannerType::A_STAR) {
+        return std::make_unique<AStarPathPlanner>(plannerCellSize);
+    }
+
+    return std::make_unique<BfsPathPlanner>(plannerCellSize);
+}
+
 }  // namespace
 
 Application::Application(const Config& config)
@@ -113,7 +130,7 @@ Application::Application(const Config& config)
       m_showTargetReached(false),
       m_targetReachedTimer(0.0f),
       m_mode(Mode::Manual),
-      m_pathPlanner(std::make_unique<BfsPathPlanner>(cellSize)),
+      m_pathPlanner(createPathPlanner(config.m_pathPlannerType, cellSize)),
       m_currentWayPointIndex(0U) {
     m_window.setFramerateLimit(FRAME_RATE_LIMIT);
     m_mapGenerator.generateNewObstacle(m_map, m_config, m_robot.getPosition(), m_robot.getRadius());

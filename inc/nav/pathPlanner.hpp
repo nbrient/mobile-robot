@@ -88,6 +88,16 @@ protected:
      */
     Vector2Dim gridToWorld(const GridCell& cell) const;
 
+    /**
+     * @brief Check if two cells are the same.
+     *
+     * @param left Left cell.
+     * @param right Right cell.
+     *
+     * @return True if cells are equal, false otherwise.
+     */
+    bool areCellsEqual(const GridCell& left, const GridCell& right) const;
+
 protected:
     /**
      * @brief Grid cell size in world units.

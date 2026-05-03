@@ -10,8 +10,8 @@
  */
 
 /* System includes */
-#include <cstdio>
 #include <algorithm>
+#include <cstdio>
 #include <queue>
 #include <vector>
 
@@ -19,21 +19,6 @@
 #include "nav/bfsPathPlanner.hpp"
 
 /* Declarations */
-namespace {
-
-/**
- * @brief Check if two cells are the same.
- *
- * @param left Left cell.
- * @param right Right cell.
- *
- * @return True if cells are equal, false otherwise.
- */
-bool areCellsEqual(const GridCell& left, const GridCell& right) {
-    return (left.x == right.x) && (left.y == right.y);
-}
-
-}  // namespace
 
 /* Implementation */
 BfsPathPlanner::BfsPathPlanner(float cellSize) : PathPlanner(cellSize) {
@@ -76,11 +61,11 @@ std::vector<Vector2Dim> BfsPathPlanner::computePath(const Map& map, float robotR
     /* Convert a 2D grid into a unique linear index. */
     auto indexCellInLinear = [gridWidth](int x, int y) -> int { return (y * gridWidth) + x; };
 
-    const int cellCount = gridWidth * gridHeight;
+    const std::size_t cellCount = static_cast<std::size_t>(gridWidth) * static_cast<std::size_t>(gridHeight);
 
     /* BFS working buffers. */
-    std::vector<bool> visited(static_cast<std::size_t>(cellCount), false);
-    std::vector<int> parent(static_cast<std::size_t>(cellCount), -1);
+    std::vector<bool> visited(cellCount, false);
+    std::vector<int> parent(cellCount, -1);
 
     /* BFS queue initialization with start cell. */
     std::queue<GridCell> queue;
@@ -88,8 +73,9 @@ std::vector<Vector2Dim> BfsPathPlanner::computePath(const Map& map, float robotR
     visited[static_cast<std::size_t>(indexCellInLinear(startCell.x, startCell.y))] = true;
 
     /* 4-connected neighborhood offsets. */
-    const int dx[4] = {1, -1, 0, 0};
-    const int dy[4] = {0, 0, 1, -1};
+    static constexpr std::size_t DIRECTION_COUNT = 4u;
+    const int dx[DIRECTION_COUNT] = {1, -1, 0, 0};
+    const int dy[DIRECTION_COUNT] = {0, 0, 1, -1};
 
     bool found = false;
 
@@ -105,7 +91,7 @@ std::vector<Vector2Dim> BfsPathPlanner::computePath(const Map& map, float robotR
         }
 
         /* Explore neighboring cells to find target. */
-        for (int direction = 0; direction < 4; direction++) {
+        for (std::size_t direction = 0; direction < DIRECTION_COUNT; direction++) {
             const int nextX = current.x + dx[direction];
             const int nextY = current.y + dy[direction];
 

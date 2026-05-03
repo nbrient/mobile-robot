@@ -42,7 +42,7 @@ struct GridCell {
 /**
  * @brief Supported path planner types.
  */
-enum class PathPlannerType { BFS };
+enum class PathPlannerType { BFS, A_STAR };
 
 /**
  * @brief Compute squared distance between two points.

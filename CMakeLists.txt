@@ -19,6 +19,7 @@ add_executable(robot_target
     src/entity/robot.cpp
     src/nav/pathPlanner.cpp
     src/nav/bfsPathPlanner.cpp
+    src/nav/aStarPathPlanner.cpp
 )
 
 target_include_directories(robot_target

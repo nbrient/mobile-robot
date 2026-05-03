@@ -64,3 +64,7 @@ Vector2Dim PathPlanner::gridToWorld(const GridCell& cell) const {
     /* Take cell m_center */
     return {(static_cast<float>(cell.x) + 0.5f) * m_cellSize, (static_cast<float>(cell.y) + 0.5f) * m_cellSize};
 }
+
+bool PathPlanner::areCellsEqual(const GridCell& left, const GridCell& right) const {
+    return (left.x == right.x) && (left.y == right.y);
+}
